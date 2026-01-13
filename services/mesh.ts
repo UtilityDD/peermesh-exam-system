@@ -18,11 +18,30 @@ class MeshService {
 
         return new Promise((resolve, reject) => {
             console.log('Initializing Peer...');
-            this.peer = id ? new Peer(id) : new Peer();
+
+            // Standard STUN servers for NAT traversal
+            const config = {
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' },
+                    ]
+                }
+            };
+
+            this.peer = id ? new Peer(id, config) : new Peer(config);
 
             this.peer.on('open', (id) => {
                 console.log('Peer ID registered: ' + id);
                 resolve(id);
+            });
+
+            this.peer.on('disconnected', () => {
+                console.log('Peer disconnected from signaling server. Attempting reconnect...');
+                this.peer?.reconnect();
             });
 
             this.peer.on('connection', (conn) => {
@@ -33,7 +52,9 @@ class MeshService {
             this.peer.on('error', (err) => {
                 const message = `Peer error (${err.type}): ${err.message}`;
                 console.error(message);
-                // Don't reject if we are already resolved, but useful for initial connection
+                if (err.type === 'peer-unavailable') {
+                    // This error is expected for incorrect Instructor IDs
+                }
                 reject(new Error(message));
             });
         });
@@ -110,6 +131,19 @@ class MeshService {
 
     getConnectedCount(): number {
         return this.connections.size;
+    }
+
+    destroy() {
+        if (this.peer) {
+            this.connections.forEach(c => c.close());
+            this.connections.clear();
+            this.peer.destroy();
+            this.peer = null;
+        }
+    }
+
+    isDisconnected(): boolean {
+        return !this.peer || this.peer.disconnected || this.peer.destroyed;
     }
 }
 
