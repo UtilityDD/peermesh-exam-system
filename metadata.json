@@ -1,0 +1,7 @@
+{
+  "name": "PeerMesh Exam System",
+  "description": "A high-fidelity simulation of an offline-first, multi-channel exam tool featuring instructor controls, real-time student response tracking, and AI-powered question generation.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
