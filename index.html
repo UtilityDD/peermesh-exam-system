@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PeerMesh Exam System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,12 +22,17 @@
     }
 
     /* Android Safe Areas */
+    :root {
+      --safe-top: max(env(safe-area-inset-top), 38px);
+      --safe-bottom: max(env(safe-area-inset-bottom), 16px);
+    }
+
     .safe-area-top {
-      padding-top: env(safe-area-inset-top);
+      padding-top: var(--safe-top);
     }
 
     .safe-area-bottom {
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: var(--safe-bottom);
     }
 
     /* Allow selection only in inputs */

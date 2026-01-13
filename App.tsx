@@ -2,14 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import InstructorDashboard from './components/InstructorDashboard';
 import StudentPortal from './components/StudentPortal';
-import { ShieldCheck, UserCircle2, GraduationCap, Wifi, Bluetooth, Radio } from 'lucide-react';
+import UserGuide from './components/UserGuide';
+import { ShieldCheck, UserCircle2, GraduationCap, Wifi, Bluetooth, Radio, HelpCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<'none' | 'instructor' | 'student'>('none');
+  const [showGuide, setShowGuide] = useState(false);
 
   if (role === 'none') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 safe-area-top">
         <div className="max-w-4xl w-full space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
 
           {/* Logo Section */}
@@ -79,13 +81,24 @@ const App: React.FC = () => {
             PeerMesh
           </span>
         </div>
-        <button
-          onClick={() => setRole('none')}
-          className="text-sm font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2"
-        >
-          Switch Role
-        </button>
+        <div className="flex items-center gap-3 md:gap-6">
+          <button
+            onClick={() => setShowGuide(true)}
+            className="flex items-center gap-2 text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition-colors"
+          >
+            <HelpCircle size={16} />
+            <span className="hidden sm:inline">Guide</span>
+          </button>
+          <button
+            onClick={() => setRole('none')}
+            className="text-sm font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 px-2"
+          >
+            Switch Role
+          </button>
+        </div>
       </nav>
+
+      {showGuide && <UserGuide onClose={() => setShowGuide(false)} />}
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 safe-area-bottom">
         {role === 'instructor' ? <InstructorDashboard /> : <StudentPortal />}
