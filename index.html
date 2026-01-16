@@ -23,12 +23,20 @@
 
     /* Android Safe Areas */
     :root {
-      --safe-top: max(env(safe-area-inset-top), 38px);
+      --safe-top: env(safe-area-inset-top);
       --safe-bottom: max(env(safe-area-inset-bottom), 16px);
     }
 
+    /* Mobile-specific fallback for Android overlap issues */
+    @media (max-width: 768px) {
+      :root {
+        --safe-top: max(env(safe-area-inset-top), 35px);
+      }
+    }
+
     .safe-area-top {
-      padding-top: var(--safe-top);
+      /* Status bar height + 16px content padding */
+      padding-top: calc(var(--safe-top) + 16px) !important;
     }
 
     .safe-area-bottom {

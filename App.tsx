@@ -79,7 +79,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 relative flex flex-col">
-      <nav className="sticky top-0 z-50 glass border-b border-slate-200 px-6 py-4 flex justify-between items-center safe-area-top backdrop-blur-xl bg-white/80">
+      <nav className="sticky top-0 z-50 glass border-b border-slate-200 px-6 pb-4 flex justify-between items-center safe-area-top backdrop-blur-xl bg-white/80">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-br from-blue-800 to-blue-900 p-1.5 rounded-lg shadow">
             <Radio size={20} className="text-white" />
