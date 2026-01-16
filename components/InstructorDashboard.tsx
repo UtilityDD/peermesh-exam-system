@@ -60,6 +60,8 @@ const InstructorDashboard: React.FC = () => {
   const [showImportGuide, setShowImportGuide] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isSetupLocked, setIsSetupLocked] = useState(false);
+  const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
+  const [analyticsTab, setAnalyticsTab] = useState<'students' | 'questions' | 'overview'>('overview');
   const [examStartTime, setExamStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [editForm, setEditForm] = useState<Partial<Question>>({
@@ -443,6 +445,64 @@ const InstructorDashboard: React.FC = () => {
   };
 
   const currentResponses = responses.filter(r => r.questionId === questions[currentQ]?.id);
+
+  // Advanced Analytics Engine
+  const studentAnalytics = React.useMemo(() => {
+    return students.map(student => {
+      const studentResponses = responses.filter(r => r.studentId === student.id);
+      const correct = studentResponses.filter(r => r.isCorrect).length;
+      const wrong = studentResponses.filter(r => !r.isCorrect).length;
+      const answered = studentResponses.length;
+      const skipped = questions.length - answered;
+      const percentage = questions.length > 0 ? (correct / questions.length) * 100 : 0;
+
+      return {
+        ...student,
+        correct,
+        wrong,
+        skipped,
+        answered,
+        percentage: Math.round(percentage),
+        grade: percentage >= 80 ? 'A' : percentage >= 60 ? 'B' : percentage >= 40 ? 'C' : 'D'
+      };
+    });
+  }, [students, responses, questions]);
+
+  const questionAnalytics = React.useMemo(() => {
+    return questions.map((q, idx) => {
+      const qResponses = responses.filter(r => r.questionId === q.id);
+      const correct = qResponses.filter(r => r.isCorrect).length;
+      const total = qResponses.length;
+      const correctnessRatio = total > 0 ? (correct / total) * 100 : 0;
+
+      return {
+        id: q.id,
+        text: q.text,
+        index: idx + 1,
+        correct,
+        total,
+        percentage: Math.round(correctnessRatio),
+        difficulty: correctnessRatio < 30 ? 'Hard' : correctnessRatio < 70 ? 'Medium' : 'Easy'
+      };
+    });
+  }, [questions, responses]);
+
+  const sessionOverview = React.useMemo(() => {
+    const totalAnswered = responses.length;
+    const totalPossible = students.length * questions.length;
+    const participationRate = totalPossible > 0 ? (totalAnswered / totalPossible) * 100 : 0;
+    const avgScore = studentAnalytics.length > 0 ? studentAnalytics.reduce((acc, s) => acc + s.percentage, 0) / studentAnalytics.length : 0;
+
+    return {
+      totalAnswered,
+      totalPossible,
+      participationRate: Math.round(participationRate),
+      avgScore: Math.round(avgScore),
+      topStudent: studentAnalytics.length > 0 ? [...studentAnalytics].sort((a, b) => b.percentage - a.percentage)[0] : null,
+      hardestQuestion: questionAnalytics.length > 0 ? [...questionAnalytics].sort((a, b) => a.percentage - b.percentage)[0] : null
+    };
+  }, [studentAnalytics, questionAnalytics, students, questions, responses]);
+
   const statsData = questions.map((q, idx) => {
     const qResponses = responses.filter(r => r.questionId === q.id);
     const correctCount = qResponses.filter(r => r.isCorrect).length;
@@ -1105,12 +1165,21 @@ const InstructorDashboard: React.FC = () => {
                     </button>
                   </div>
 
-                  <button
-                    onClick={resetSession}
-                    className="mt-4 px-10 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform"
-                  >
-                    Start New Exam
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => setShowAdvancedAnalytics(true)}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black hover:bg-indigo-100 transition-all border-2 border-indigo-100"
+                    >
+                      <BarChart3 size={20} />
+                      Practical Analysis
+                    </button>
+                    <button
+                      onClick={resetSession}
+                      className="flex-1 px-10 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform"
+                    >
+                      Start New Exam
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1445,6 +1514,242 @@ const InstructorDashboard: React.FC = () => {
                   className="py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold shadow-lg shadow-rose-200 transition-all active:scale-95"
                 >
                   End Session
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Advanced Analytics Modal */}
+      {showAdvancedAnalytics && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-2 md:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setShowAdvancedAnalytics(false)} />
+
+          <div className="relative bg-slate-50 w-full max-w-4xl max-h-[95vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in slide-in-from-bottom-12 duration-500">
+            {/* Modal Header */}
+            <div className="bg-white px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100">
+                  <BarChart3 size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Practical Analysis</h2>
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Real-Life Exam Review Mode</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                {(['overview', 'students', 'questions'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setAnalyticsTab(tab)}
+                    className={`px-5 py-2 rounded-xl text-xs font-black transition-all ${analyticsTab === tab ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setShowAdvancedAnalytics(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-indigo-200">
+              {analyticsTab === 'overview' && (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg. Score</p>
+                      <p className="text-4xl font-black text-indigo-600">{sessionOverview.avgScore}%</p>
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-500" style={{ width: `${sessionOverview.avgScore}%` }} />
+                      </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Participation</p>
+                      <p className="text-4xl font-black text-emerald-600">{sessionOverview.participationRate}%</p>
+                      <p className="text-[10px] text-slate-500 font-bold">{sessionOverview.totalAnswered} Answers / {sessionOverview.totalPossible} Possible</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top Candidate</p>
+                      <p className="text-lg font-black text-slate-900 truncate px-2">{sessionOverview.topStudent?.name || 'N/A'}</p>
+                      <p className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full inline-block">{sessionOverview.topStudent?.percentage || 0}% Accuracy</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hardest Q</p>
+                      <p className="text-lg font-black text-slate-900 truncate px-2">Q{sessionOverview.hardestQuestion?.index || 'N/A'}</p>
+                      <p className="text-[10px] font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full inline-block">{sessionOverview.hardestQuestion?.percentage || 0}% Correct</p>
+                    </div>
+                  </div>
+
+                  {/* Highlights section */}
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200">
+                      <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                        <Users size={20} className="text-indigo-600" />
+                        Class Performance Dist.
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { l: 'Excellence (80-100%)', c: 'bg-emerald-500', v: studentAnalytics.filter(s => s.percentage >= 80).length },
+                          { l: 'Satisfactory (60-79%)', c: 'bg-indigo-500', v: studentAnalytics.filter(s => s.percentage >= 60 && s.percentage < 80).length },
+                          { l: 'Passing (40-59%)', c: 'bg-amber-500', v: studentAnalytics.filter(s => s.percentage >= 40 && s.percentage < 60).length },
+                          { l: 'Needs Focus (Below 40%)', c: 'bg-rose-500', v: studentAnalytics.filter(s => s.percentage < 40).length }
+                        ].map((stat, i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${stat.c}`} />
+                              <span className="text-xs font-bold text-slate-600">{stat.l}</span>
+                            </div>
+                            <span className="text-xs font-black text-slate-900">{stat.v} Students</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white space-y-6">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-xl font-black">Quick Summary</h3>
+                        <Zap size={24} className="opacity-50" />
+                      </div>
+                      <p className="text-sm text-indigo-100 opacity-90 leading-relaxed font-medium">
+                        The exam session on "{topic || 'Untitled'}" saw a {sessionOverview.participationRate}% participation rate.
+                        {sessionOverview.avgScore > 60 ? 'Generally, students grasped the concepts well.' : 'The results suggest some areas require further clarification.'}
+                        The hardest challenge for the group was "{sessionOverview.hardestQuestion?.text.slice(0, 40)}...".
+                      </p>
+                      <button
+                        onClick={() => publishResults(true)}
+                        className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black shadow-xl shadow-black/10 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+                      >
+                        Push Final Results Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {analyticsTab === 'students' && (
+                <div className="space-y-4 animate-in fade-in duration-500">
+                  <div className="bg-white p-4 rounded-[1.5rem] border border-slate-200 mb-6">
+                    <div className="grid grid-cols-6 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                      <div className="col-span-2">Candidate</div>
+                      <div className="text-center">Score %</div>
+                      <div className="text-center">R / W</div>
+                      <div className="text-center">Grade</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                  </div>
+                  {studentAnalytics.map(student => (
+                    <div key={student.id} className="bg-white p-4 md:p-6 rounded-3xl border border-slate-100 hover:border-indigo-200 transition-all group">
+                      <div className="grid grid-cols-6 items-center">
+                        <div className="col-span-2 flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-white ${student.percentage >= 80 ? 'bg-emerald-500' : student.percentage >= 50 ? 'bg-indigo-500' : 'bg-rose-500'}`}>
+                            {student.name[0]}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{student.name}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">{student.id.slice(0, 6)}</p>
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-black text-slate-900">{student.percentage}%</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-1.5 text-[10px] font-black">
+                            <span className="text-emerald-500">{student.correct}✓</span>
+                            <span className="text-slate-300">/</span>
+                            <span className="text-rose-500">{student.wrong}✗</span>
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <span className={`px-3 py-1 rounded-lg text-xs font-black ${student.grade === 'A' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
+                            Grade {student.grade}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <button
+                            onClick={() => {
+                              const text = `📊 Exam Score Sheet: ${student.name}\n\n📝 Topic: ${topic}\n✅ Correct: ${student.correct}\n❌ Wrong: ${student.wrong}\n⏳ Skipped: ${student.skipped}\n🏆 Score: ${student.percentage}%\n🎯 Grade: ${student.grade}\n\nProvided by PeerMesh Exam System`;
+                              window.open(`whatsapp://send?text=${encodeURIComponent(text)}`);
+                            }}
+                            className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                            title="Share via WhatsApp"
+                          >
+                            <MessageCircle size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {analyticsTab === 'questions' && (
+                <div className="space-y-4 animate-in fade-in duration-500">
+                  {questionAnalytics.map(q => (
+                    <div key={q.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-black rounded-md">Q{q.index}</span>
+                            <span className={`px-2 py-0.5 text-[10px] font-black rounded-md ${q.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' : q.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}`}>
+                              {q.difficulty}
+                            </span>
+                          </div>
+                          <p className="text-sm font-bold text-slate-800 leading-snug">{q.text}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-black text-slate-900">{q.percentage}%</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Success</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                          <span>Correct ({q.correct})</span>
+                          <span>Total Attempts ({q.total})</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                          <div
+                            className={`h-full transition-all duration-1000 ${q.percentage < 40 ? 'bg-rose-500' : q.percentage < 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                            style={{ width: `${q.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-white p-6 md:p-8 flex items-center justify-between border-t border-slate-200">
+              <div className="hidden sm:block">
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Analysis Mode active</p>
+                <p className="text-[10px] text-slate-400">Review outcomes before student publication</p>
+              </div>
+              <div className="flex gap-4 w-full sm:w-auto">
+                <button
+                  onClick={() => setShowAdvancedAnalytics(false)}
+                  className="flex-1 sm:flex-none px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black hover:bg-slate-200 transition-all"
+                >
+                  Close Analysis
+                </button>
+                <button
+                  onClick={() => {
+                    const summary = `🏆 Exam Summary: ${topic}\n\n👥 Attendees: ${students.length}\n📊 Class Average: ${sessionOverview.avgScore}%\n✅ Question Success: Q1: ${questionAnalytics[0]?.percentage || 0}%\n\nSession completed via PeerMesh.`;
+                    window.open(`whatsapp://send?text=${encodeURIComponent(summary)}`);
+                  }}
+                  className="flex-1 sm:flex-none px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={20} />
+                  Share Class Report
                 </button>
               </div>
             </div>
