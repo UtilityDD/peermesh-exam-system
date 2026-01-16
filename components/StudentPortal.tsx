@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Wifi, Search, GraduationCap, Lock, CheckCircle, Clock, AlertTriangle, Loader2, XCircle, CheckCircle2, ChevronRight, Fingerprint, RefreshCw } from 'lucide-react';
 import { meshService } from '../services/mesh';
 import { Question, StudentResponse } from '../types';
+import AnimatedBackground from './AnimatedBackground';
 
 const StudentPortal: React.FC = () => {
   const [joined, setJoined] = useState(false);
@@ -270,61 +271,65 @@ const StudentPortal: React.FC = () => {
 
   if (!joined) {
     return (
-      <div className="max-w-xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 text-center space-y-6">
-          <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto">
-            <Wifi size={40} className="text-pink-600 animate-pulse" />
-          </div>
-          <h2 className="text-2xl font-bold">Join Local Mesh</h2>
-          <p className="text-slate-500">Enter your name and the Instructor's Mesh ID to begin.</p>
+      <div className="relative">
+        <AnimatedBackground variant="student" intensity="subtle" />
 
-          <div className="space-y-4 pt-4">
-            <input
-              type="text"
-              placeholder="Your Full Name"
-              className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Instructor Mesh ID"
-              className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none"
-              value={instructorId}
-              onChange={(e) => setInstructorId(e.target.value)}
-            />
-            <button
-              onClick={handleJoin}
-              disabled={searching || !instructorId || !studentName}
-              className="w-full py-4 bg-pink-600 text-white rounded-2xl font-bold hover:bg-pink-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {searching ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} /> Connecting...
-                </>
-              ) : (
-                <>
-                  Join Exam
-                </>
-              )}
-            </button>
-            <div className="text-xs text-slate-400 flex items-center justify-center gap-4">
-              <span className="flex items-center gap-1"><Lock size={12} /> Secure Mesh</span>
-              <span className="flex items-center gap-1"><GraduationCap size={12} /> PeerMesh v1.0</span>
+        <div className="relative z-10 max-w-xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[2rem] shadow-2xl border border-white/50 text-center space-y-6">
+            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Wifi size={40} className="text-amber-600 animate-pulse" />
+            </div>
+            <h2 className="text-2xl font-bold">Join Local Mesh</h2>
+            <p className="text-slate-500">Enter your name and the Instructor's Mesh ID to begin.</p>
+
+            <div className="space-y-4 pt-4">
+              <input
+                type="text"
+                placeholder="Your Full Name"
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 outline-none"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Instructor Mesh ID"
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 outline-none"
+                value={instructorId}
+                onChange={(e) => setInstructorId(e.target.value)}
+              />
+              <button
+                onClick={handleJoin}
+                disabled={searching || !instructorId || !studentName}
+                className="w-full py-4 bg-amber-600 text-white rounded-2xl font-bold hover:bg-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-amber-200"
+              >
+                {searching ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} /> Connecting...
+                  </>
+                ) : (
+                  <>
+                    Join Exam
+                  </>
+                )}
+              </button>
+              <div className="text-xs text-slate-400 flex items-center justify-center gap-4">
+                <span className="flex items-center gap-1"><Lock size={12} /> Secure Mesh</span>
+                <span className="flex items-center gap-1"><GraduationCap size={12} /> PeerMesh v1.0</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white/50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
-            <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg mb-2"><Wifi size={18} /></div>
-            <p className="text-xs font-bold text-slate-600 uppercase">Wi-Fi Direct</p>
-            <p className="text-[10px] text-slate-400">High speed, low latency</p>
-          </div>
-          <div className="bg-white/50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
-            <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg mb-2"><Lock size={18} /></div>
-            <p className="text-xs font-bold text-slate-600 uppercase">Kiosk Mode</p>
-            <p className="text-[10px] text-slate-400">Screen lock enabled</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/60 backdrop-blur p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
+              <div className="p-2 bg-blue-100 text-blue-800 rounded-lg mb-2"><Wifi size={18} /></div>
+              <p className="text-xs font-bold text-slate-600 uppercase">Wi-Fi Direct</p>
+              <p className="text-[10px] text-slate-400">High speed, low latency</p>
+            </div>
+            <div className="bg-white/60 backdrop-blur p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg mb-2"><Lock size={18} /></div>
+              <p className="text-xs font-bold text-slate-600 uppercase">Kiosk Mode</p>
+              <p className="text-[10px] text-slate-400">Screen lock enabled</p>
+            </div>
           </div>
         </div>
       </div>
@@ -356,9 +361,9 @@ const StudentPortal: React.FC = () => {
       )}
 
       {/* Student Status Bar */}
-      <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl flex justify-between items-center shadow-lg">
+      <div className="relative z-10 bg-slate-900 text-white px-6 py-3 rounded-2xl flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center font-bold text-xs uppercase">
+          <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-xs uppercase">
             {studentName[0]}
           </div>
           <div>
@@ -400,7 +405,7 @@ const StudentPortal: React.FC = () => {
             <div className="overflow-y-auto px-6 pb-12 pt-2 scrollbar-none">
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-200">
+                  <div className="bg-blue-800 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-900/30">
                     <Fingerprint size={18} />
                   </div>
                   <div>
@@ -408,7 +413,7 @@ const StudentPortal: React.FC = () => {
                     <p className="text-sm font-bold text-slate-800 tracking-tight">Question Terminal</p>
                   </div>
                 </div>
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-2 transition-all ${timeLeft < 10 ? 'border-rose-100 bg-rose-50 text-rose-600 shadow-rose-100' : 'border-indigo-100 bg-indigo-50 text-indigo-700'}`}>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-2 transition-all ${timeLeft < 10 ? 'border-rose-100 bg-rose-50 text-rose-600 shadow-rose-100' : 'border-blue-100 bg-blue-50 text-blue-800'}`}>
                   <Clock size={16} className={timeLeft < 10 ? 'animate-pulse' : ''} />
                   <span className="font-mono font-black text-xl leading-none">{timeLeft}s</span>
                 </div>
@@ -426,22 +431,22 @@ const StudentPortal: React.FC = () => {
                       onClick={() => !answered && handleSubmit(idx)}
                       disabled={answered}
                       className={`group relative flex items-center justify-between p-5 rounded-[1.5rem] border-2 transition-all duration-300 transform active:scale-[0.98] ${selectedIdx === idx
-                        ? 'border-indigo-600 bg-indigo-50 shadow-md translate-x-1'
-                        : 'border-slate-100 bg-slate-50 hover:border-indigo-200 hover:bg-white'
+                        ? 'border-amber-600 bg-amber-50 shadow-md translate-x-1'
+                        : 'border-slate-100 bg-slate-50 hover:border-amber-200 hover:bg-white'
                         } ${answered && selectedIdx !== idx ? 'opacity-40 grayscale' : ''}`}
                     >
                       <div className="flex items-center gap-4">
-                        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all ${selectedIdx === idx ? 'bg-indigo-600 text-white rotate-6' : 'bg-white text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all ${selectedIdx === idx ? 'bg-amber-600 text-white rotate-6' : 'bg-white text-slate-400 group-hover:bg-amber-100 group-hover:text-amber-600'
                           }`}>
                           {String.fromCharCode(65 + idx)}
                         </span>
-                        <span className={`font-bold text-lg ${selectedIdx === idx ? 'text-indigo-900' : 'text-slate-600'}`}>
+                        <span className={`font-bold text-lg ${selectedIdx === idx ? 'text-amber-900' : 'text-slate-600'}`}>
                           {opt}
                         </span>
                       </div>
                       {selectedIdx === idx && (
                         <div className="animate-in zoom-in spin-in-12 duration-300">
-                          <CheckCircle2 className="text-indigo-600 shrink-0" size={24} />
+                          <CheckCircle2 className="text-amber-600 shrink-0" size={24} />
                         </div>
                       )}
                     </button>

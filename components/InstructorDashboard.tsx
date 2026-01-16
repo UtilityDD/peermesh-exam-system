@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { generateQuestions } from '../services/gemini';
 import { meshService, MeshMessage } from '../services/mesh';
 import { Question, ExamStatus, ConnectionMode, Student, StudentResponse } from '../types';
+import AnimatedBackground from './AnimatedBackground';
 import {
   Plus, Play, Pause, ChevronRight, Users,
   BarChart3, Settings, Wifi, Bluetooth, Zap,
@@ -50,6 +51,7 @@ const InstructorDashboard: React.FC = () => {
 
   const [editingQIndex, setEditingQIndex] = useState<number | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Question>>({
     text: '',
     options: ['', '', '', ''],
@@ -366,16 +368,18 @@ const InstructorDashboard: React.FC = () => {
     }
   };
 
-  const resetSession = () => {
-    if (confirm('Are you sure you want to end this session? All student devices will be disconnected.')) {
-      const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      meshService.broadcast({ type: 'SESSION_ENDED', payload: { endTime } });
-      // Small timeout to ensure PeerJS sends the message before the page reloads
-      setTimeout(() => {
-        localStorage.removeItem('PEERMESH_SESSION');
-        window.location.reload();
-      }, 500);
-    }
+  const openEndSessionModal = () => {
+    setShowEndSessionModal(true);
+  };
+
+  const confirmEndSession = () => {
+    const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    meshService.broadcast({ type: 'SESSION_ENDED', payload: { endTime } });
+    // Small timeout to ensure PeerJS sends the message before the page reloads
+    setTimeout(() => {
+      localStorage.removeItem('PEERMESH_SESSION');
+      window.location.reload();
+    }, 500);
   };
 
   const updateQuestionTime = (id: string, newTime: number) => {
@@ -428,20 +432,21 @@ const InstructorDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="relative space-y-8 animate-in fade-in duration-500">
+      <AnimatedBackground variant="instructor" intensity="subtle" />
 
       {/* Header Info */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Exam Controller</h1>
-            <p className="text-slate-500">Manage your active mesh session</p>
+      <div className="relative z-10 flex flex-col gap-4 w-full">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Exam Controller</h1>
+            <p className="text-sm md:text-base text-slate-500">Manage your active mesh session</p>
           </div>
           {status !== ExamStatus.IDLE && (
             <button
-              onClick={resetSession}
-              title="Clear Session"
-              className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full transition-all shadow-sm active:scale-95"
+              onClick={openEndSessionModal}
+              title="End Session"
+              className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full transition-all shadow-sm active:scale-95 flex-shrink-0"
             >
               <div className="relative flex items-center justify-center w-2 h-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -451,14 +456,14 @@ const InstructorDashboard: React.FC = () => {
             </button>
           )}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-semibold">
-              <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
-              {connMode}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+          <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex-shrink-0">
+            <div className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-blue-50 text-blue-900 rounded-xl text-xs md:text-sm font-semibold">
+              <div className="w-2 h-2 bg-blue-800 rounded-full animate-pulse flex-shrink-0" />
+              <span className="hidden sm:inline">{connMode}</span>
             </div>
             <select
-              className="text-sm bg-transparent outline-none pr-2"
+              className="text-xs md:text-sm bg-transparent outline-none pr-1 max-w-[120px]"
               value={connMode}
               onChange={(e) => setConnMode(e.target.value as ConnectionMode)}
             >
@@ -466,19 +471,21 @@ const InstructorDashboard: React.FC = () => {
             </select>
           </div>
           {peerId && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <button
                 onClick={refreshMesh}
                 title="Restart Mesh"
-                className="p-1 px-2 text-slate-400 hover:text-indigo-600 bg-white border border-slate-200 rounded-lg transition-colors"
+                className="p-2 text-slate-400 hover:text-indigo-600 bg-white border border-slate-200 rounded-lg transition-colors flex-shrink-0"
               >
                 <RefreshCw size={14} className={signalStatus === 'offline' ? 'animate-spin text-rose-500' : ''} />
               </button>
               <button
                 onClick={copyId}
-                className="flex items-center gap-2 px-3 py-1 text-xs font-mono bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200"
+                className="flex items-center gap-2 px-2 md:px-3 py-1 text-xs font-mono bg-blue-50 text-blue-900 rounded-lg hover:bg-blue-100 border border-blue-100 flex-1 min-w-0 overflow-hidden"
+                title={peerId}
               >
-                ID: {peerId} <Copy size={12} />
+                <span className="truncate">ID: {peerId}</span>
+                <Copy size={12} className="flex-shrink-0" />
               </button>
             </div>
           )}
@@ -486,9 +493,9 @@ const InstructorDashboard: React.FC = () => {
       </div>
 
       {status === ExamStatus.IDLE && (
-        <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2rem] shadow-xl border border-slate-100 text-center space-y-6">
-          <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto">
-            <Plus size={40} className="text-indigo-600" />
+        <div className="relative z-10 max-w-2xl mx-auto bg-white/95 backdrop-blur-xl p-10 rounded-[2rem] shadow-2xl border border-slate-100 text-center space-y-6">
+          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+            <Plus size={40} className="text-blue-800" />
           </div>
           <h2 className="text-2xl font-bold">New Mesh Exam</h2>
           <p className="text-slate-500">Enter a topic and let AI prepare your question bank instantly.</p>
@@ -503,7 +510,7 @@ const InstructorDashboard: React.FC = () => {
             <button
               onClick={handleCreateExam}
               disabled={loading || !topic}
-              className="absolute right-2 top-2 bottom-2 bg-indigo-600 text-white px-6 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="absolute right-2 top-2 bottom-2 bg-blue-800 text-white px-6 rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50 transition-colors flex items-center gap-2 shadow"
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} />}
               Generate
@@ -512,7 +519,7 @@ const InstructorDashboard: React.FC = () => {
           <div className="pt-2">
             <button
               onClick={useManualQuestions}
-              className="text-sm text-indigo-600 font-medium hover:underline flex items-center gap-1 mx-auto"
+              className="text-sm text-blue-800 font-medium hover:underline flex items-center gap-1 mx-auto"
             >
               <Zap size={14} /> Skip AI and use Manual Test Questions
             </button>
@@ -521,7 +528,7 @@ const InstructorDashboard: React.FC = () => {
       )}
 
       {status !== ExamStatus.IDLE && (
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="relative z-10 grid lg:grid-cols-3 gap-8">
 
           {/* Main Controller Area */}
           <div className="lg:col-span-2 space-y-4 md:space-y-6">
@@ -550,10 +557,10 @@ const InstructorDashboard: React.FC = () => {
                     <p className="text-sm md:text-base text-slate-500">Share the Mesh ID below with your students to join.</p>
                   </div>
 
-                  <div className="flex flex-col items-center gap-4 px-2">
-                    <div className="w-full max-w-sm bg-indigo-50 border-2 border-dashed border-indigo-200 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] relative group">
+                  <div className="flex flex-col items-center gap-4 px-2 w-full">
+                    <div className="w-full max-w-full md:max-w-sm bg-indigo-50 border-2 border-dashed border-indigo-200 p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] relative group mx-auto">
                       <p className="text-[10px] md:text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">Your Mesh ID</p>
-                      <div className="text-2xl md:text-4xl font-mono font-black text-indigo-600 tracking-tighter break-all">
+                      <div className="text-xl md:text-4xl font-mono font-black text-indigo-600 tracking-tighter col-span-full break-all leading-tight">
                         {peerId || 'Initializing...'}
                       </div>
                       <button
@@ -840,73 +847,82 @@ const InstructorDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Sidebar - Student Status */}
-          <div className="space-y-4 md:space-y-6">
-            <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 shadow-sm border border-slate-100 lg:sticky lg:top-24">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Users size={20} className="text-indigo-600" />
-                  Live Roster
-                </h3>
-                <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-lg font-bold">
-                  {students.length} Joined
-                </span>
+          {/* Student Roster Sidebar */}
+          <div className="lg:col-span-1 relative z-10">
+            <div className="bg-white p-4 md:p-6 rounded-[2rem] shadow-lg border border-slate-100 sticky top-4">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-slate-900">Connected</h2>
+                  <p className="text-xs text-slate-500 font-mono">{students.length}/{students.length} Online</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                  <Users size={16} className="text-emerald-600" />
+                  <span className="font-black text-lg text-emerald-700">{students.length}</span>
+                </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 pr-2">
                 {students.map(s => {
-                  const studentResp = currentResponses.find(r => r.studentId === s.id);
+                  const studentResponses = responses.filter(r => r.studentId === s.id);
+                  const correctAnswers = studentResponses.filter(r => r.isCorrect).length;
+                  const accuracy = studentResponses.length > 0
+                    ? Math.round((correctAnswers / studentResponses.length) * 100)
+                    : 0;
+
                   return (
-                    <div key={s.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center font-bold text-indigo-700">
-                          {s.name ? s.name[0] : '?'}
+                    <div
+                      key={s.id}
+                      className={`group p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 hover:shadow-md ${s.status === 'live'
+                        ? 'border-indigo-100 bg-gradient-to-br from-indigo-50 to-white'
+                        : s.status === 'done'
+                          ? 'border-emerald-100 bg-emerald-50/50'
+                          : 'border-slate-100 bg-slate-50'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-white uppercase flex-shrink-0 ${s.status === 'live'
+                          ? 'bg-indigo-600'
+                          : s.status === 'done'
+                            ? 'bg-emerald-600'
+                            : 'bg-slate-300'
+                          }`}>
+                          {s.name[0]}
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                            {s.name}
-                            {s.violations > 0 && (
-                              <span className="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[10px] font-black animate-pulse">
-                                {s.violations} ERR
-                              </span>
-                            )}
-                          </p>
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs text-slate-500">{s.score} pts</p>
-                            {isAutomated && studentQueues[s.id] && (
-                              <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[9px] font-bold">
-                                Q{(studentCurrentIdx[s.id] || 0) + 1}/{questions.length}
-                              </span>
-                            )}
-                            {!s.isFocused && (
-                              <span className="flex items-center gap-1 text-[10px] text-rose-500 font-bold uppercase">
-                                <div className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping" />
-                                Unfocused
-                              </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm md:text-base font-bold text-slate-900 truncate" title={s.name}>{s.name}</p>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex-shrink-0 ${s.status === 'live'
+                              ? 'bg-indigo-600 text-white'
+                              : s.status === 'done'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-200 text-slate-600'
+                              }`}>
+                              {s.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2 gap-2">
+                            <div className="flex items-center gap-2">
+                              <BarChart3 size={12} className="text-slate-400 flex-shrink-0" />
+                              <span className="text-xs font-mono font-bold text-slate-600">{s.score}pts</span>
+                            </div>
+                            {studentResponses.length > 0 && (
+                              <div className="text-xs text-slate-500 font-medium">
+                                {accuracy}% <span className="text-[10px]">acc</span>
+                              </div>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {!studentResp && status === ExamStatus.ACTIVE && (
-                          <button
-                            onClick={() => simulateResponse(s.id, questions[currentQ].id)}
-                            className="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
-                          >
-                            Simulate
-                          </button>
-                        )}
-                        {studentResp ? (
-                          studentResp.isCorrect ? <CheckCircle2 className="text-green-500" size={18} /> : <XCircle className="text-rose-500" size={18} />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse" />
-                        )}
-                      </div>
                     </div>
                   );
                 })}
+
                 {students.length === 0 && (
-                  <p className="text-center text-slate-400 text-sm py-4">Waiting for students to join...</p>
+                  <div className="text-center py-8 md:py-12 text-slate-400">
+                    <Users size={32} className="mx-auto mb-3 opacity-30" />
+                    <p className="text-sm font-medium">No students connected</p>
+                    <p className="text-xs mt-1">Share Mesh ID to invite</p>
+                  </div>
                 )}
               </div>
 
@@ -927,26 +943,28 @@ const InstructorDashboard: React.FC = () => {
 
       {/* Question Editor Modal */}
       {showEditor && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-6 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={() => setShowEditor(false)} />
 
-          <div className="relative bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
-            <div className="bg-indigo-600 p-6 text-white flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-xl">
-                  {editingQIndex !== null ? <Edit2 size={20} /> : <Plus size={20} />}
+          <div className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
+            <div className="bg-indigo-600 p-4 md:p-6 text-white flex justify-between items-center flex-shrink-0">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                <div className="p-2 bg-white/20 rounded-xl flex-shrink-0">
+                  {editingQIndex !== null ? <Edit2 size={18} className="md:w-5 md:h-5" /> : <Plus size={18} className="md:w-5 md:h-5" />}
                 </div>
-                <div>
-                  <h2 className="text-xl font-black">{editingQIndex !== null ? 'Edit Question' : 'New Question'}</h2>
-                  <p className="text-xs text-indigo-100 opacity-80 uppercase tracking-widest font-bold">Manual Draft</p>
+                <div className="min-w-0">
+                  <h2 className="text-lg md:text-xl font-black truncate">{editingQIndex !== null ? 'Edit Question' : 'New Question'}</h2>
+                  <p className="text-[10px] md:text-xs text-indigo-100 opacity-80 uppercase tracking-widest font-bold">Manual Draft</p>
                 </div>
               </div>
-              <button onClick={() => setShowEditor(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
-                <X size={24} />
+              <button
+                onClick={() => setShowEditor(false)}
+                className="p-2 hover:bg-white/20 rounded-xl transition-colors flex-shrink-0"
+              >
+                <X size={20} />
               </button>
             </div>
-
-            <div className="p-6 md:p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-none">
+            <div className="p-4 md:p-8 space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(90vh-100px)]  scrollbar-thin scrollbar-thumb-slate-200">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Question Text</label>
                 <textarea
@@ -1015,8 +1033,62 @@ const InstructorDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* End Session Confirmation Modal */}
+      {showEndSessionModal && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={() => setShowEndSessionModal(false)} />
+
+          <div className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
+            <div className="bg-gradient-to-br from-rose-500 to-rose-600 p-6 text-white">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur">
+                  <XCircle size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black">End Session?</h2>
+                  <p className="text-xs text-rose-100 opacity-90 uppercase tracking-widest font-bold">Active Session Termination</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-6">
+              <div className="space-y-3">
+                <p className="text-slate-700 font-medium leading-relaxed">
+                  Are you sure you want to end this session?
+                </p>
+                <div className="bg-rose-50 border-2 border-rose-100 rounded-2xl p-4">
+                  <p className="text-sm text-rose-800 font-bold flex items-start gap-2">
+                    <span className="text-rose-500 text-lg">⚠️</span>
+                    <span>All {students.length} connected student{students.length !== 1 ? 's' : ''} will be disconnected immediately.</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowEndSessionModal(false)}
+                  className="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmEndSession();
+                    setShowEndSessionModal(false);
+                  }}
+                  className="flex-1 px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-rose-200 active:scale-95"
+                >
+                  End Session
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
 
 export default InstructorDashboard;
+
