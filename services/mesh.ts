@@ -16,47 +16,57 @@ class MeshService {
             return this.peer.id;
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             console.log('Initializing Peer...');
 
-            // Standard STUN servers for NAT traversal
             const config = {
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
                         { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
                     ]
                 }
             };
 
-            this.peer = id ? new Peer(id, config) : new Peer(config);
+            // Setup a safety timeout for offline initialization
+            const timeoutId = setTimeout(() => {
+                const fallbackId = id || `LOCAL-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                console.warn('Signaling server unreachable. Operating in OFFLINE MESH mode.');
+                resolve(fallbackId);
+            }, 5000);
 
-            this.peer.on('open', (id) => {
-                console.log('Peer ID registered: ' + id);
-                resolve(id);
-            });
+            try {
+                this.peer = id ? new Peer(id, config) : new Peer(config);
 
-            this.peer.on('disconnected', () => {
-                console.log('Peer disconnected from signaling server. Attempting reconnect...');
-                this.peer?.reconnect();
-            });
+                this.peer.on('open', (registeredId) => {
+                    clearTimeout(timeoutId);
+                    console.log('Peer ID registered: ' + registeredId);
+                    resolve(registeredId);
+                });
 
-            this.peer.on('connection', (conn) => {
-                console.log('Connected to peer:', conn.peer);
-                this.setupConnection(conn);
-            });
+                this.peer.on('disconnected', () => {
+                    console.log('Peer disconnected from signaling server. Attempting reconnect...');
+                    this.peer?.reconnect();
+                });
 
-            this.peer.on('error', (err) => {
-                const message = `Peer error (${err.type}): ${err.message}`;
-                console.error(message);
-                if (err.type === 'peer-unavailable') {
-                    // This error is expected for incorrect Instructor IDs
-                }
-                reject(new Error(message));
-            });
+                this.peer.on('connection', (conn) => {
+                    console.log('Connected to peer:', conn.peer);
+                    this.setupConnection(conn);
+                });
+
+                this.peer.on('error', (err) => {
+                    const message = `Peer error (${err.type}): ${err.message}`;
+                    console.error(message);
+
+                    // Unified LOCAL prefix for all offline/signaling fallbacks
+                    const fallbackId = id || `LOCAL-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                    resolve(fallbackId);
+                });
+            } catch (err) {
+                console.error('Failed to create Peer instance:', err);
+                resolve(`LOCAL-${Math.random().toString(36).substring(2, 6).toUpperCase()}`);
+            }
         });
     }
 

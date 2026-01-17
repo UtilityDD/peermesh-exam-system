@@ -152,7 +152,7 @@ const StudentPortal: React.FC = () => {
       if (err.message.includes('Could not connect to peer')) {
         errorMsg = 'Instructor ID not found or they are offline. Please double-check the ID.';
       } else if (err.message.includes('timed out')) {
-        errorMsg = 'Connection timed out. \n\nTips:\n1. Ensure BOTH teacher and students are on the EXACT same WiFi network.\n2. Disable "Guest Mode" or "AP Isolation" in router settings.\n3. Try restarting the teacher app if the ID was just created.';
+        errorMsg = 'Connection timed out. \n\nTips:\n1. Ensure Teacher & Students are on the SAME WiFi / Hotspot.\n2. In Hotspot mode, verify "Limit connected devices" is not blocking you.\n3. If no internet is available, ensure the Teacher is using "Local Mode" (ID starting with LOCAL-).';
       }
       alert(errorMsg);
     } finally {
@@ -275,32 +275,30 @@ const StudentPortal: React.FC = () => {
         <AnimatedBackground variant="student" intensity="subtle" />
 
         <div className="relative z-10 max-w-xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white/95 backdrop-blur-2xl p-8 rounded-[2rem] shadow-2xl border border-white/50 text-center space-y-6">
-            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto shadow-inner">
-              <Wifi size={40} className="text-amber-600 animate-pulse" />
+          <div className="bg-white/95 backdrop-blur-2xl p-6 rounded-3xl shadow-sm border border-slate-100 text-center space-y-6">
+            <div className="w-16 h-16 bg-amber-50/50 rounded-full flex items-center justify-center mx-auto">
+              <Wifi size={24} className="text-amber-600 animate-pulse" />
             </div>
-            <h2 className="text-2xl font-bold">Join Local Mesh</h2>
-            <p className="text-slate-500">Enter your name and the Instructor's Mesh ID to begin.</p>
 
-            <div className="space-y-4 pt-4">
+            <div className="space-y-4 pt-2">
               <input
                 type="text"
-                placeholder="Your Full Name"
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 outline-none"
+                placeholder="Name"
+                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-amber-500 outline-none text-sm font-semibold"
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
               />
               <input
                 type="text"
-                placeholder="Instructor Mesh ID"
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-amber-500 outline-none"
+                placeholder="Mesh ID"
+                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-amber-500 outline-none text-sm font-mono uppercase tracking-widest text-center"
                 value={instructorId}
                 onChange={(e) => setInstructorId(e.target.value)}
               />
               <button
                 onClick={handleJoin}
                 disabled={searching || !instructorId || !studentName}
-                className="w-full py-4 bg-amber-600 text-white rounded-2xl font-bold hover:bg-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-amber-200"
+                className="w-full py-3.5 bg-amber-500 text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-amber-600 transition-all flex items-center justify-center gap-2 disabled:opacity-20 shadow-md"
               >
                 {searching ? (
                   <>
@@ -312,23 +310,11 @@ const StudentPortal: React.FC = () => {
                   </>
                 )}
               </button>
-              <div className="text-xs text-slate-400 flex items-center justify-center gap-4">
-                <span className="flex items-center gap-1"><Lock size={12} /> Secure Mesh</span>
-                <span className="flex items-center gap-1"><GraduationCap size={12} /> PeerMesh v1.0</span>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-3 opacity-50">
+                <span className="flex items-center gap-1">Secure Mesh</span>
+                <span>•</span>
+                <span className="flex items-center gap-1">Protocol v1.0</span>
               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/60 backdrop-blur p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
-              <div className="p-2 bg-blue-100 text-blue-800 rounded-lg mb-2"><Wifi size={18} /></div>
-              <p className="text-xs font-bold text-slate-600 uppercase">Wi-Fi Direct</p>
-              <p className="text-[10px] text-slate-400">High speed, low latency</p>
-            </div>
-            <div className="bg-white/60 backdrop-blur p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center">
-              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg mb-2"><Lock size={18} /></div>
-              <p className="text-xs font-bold text-slate-600 uppercase">Kiosk Mode</p>
-              <p className="text-[10px] text-slate-400">Screen lock enabled</p>
             </div>
           </div>
         </div>
@@ -361,19 +347,16 @@ const StudentPortal: React.FC = () => {
       )}
 
       {/* Student Status Bar */}
-      <div className="relative z-10 bg-slate-900 text-white px-6 py-3 rounded-2xl flex justify-between items-center shadow-lg">
+      <div className="relative z-10 bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex justify-between items-center shadow-md">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-xs uppercase">
+          <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center font-black text-[10px]">
             {studentName[0]}
           </div>
-          <div>
-            <p className="text-xs font-bold leading-none">Exam Connected</p>
-            <p className="text-[10px] text-slate-400">Node ID: {meshService.getPeerId()?.slice(0, 8)}...</p>
-          </div>
+          <p className="text-[11px] font-black uppercase tracking-tight">Active Exam</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${timeLeft < 10 ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-300'}`}>
-            <Clock size={14} />
+        <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-black ${timeLeft < 10 ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-300'}`}>
+            <Clock size={12} />
             {timeLeft}s
           </div>
           <button
@@ -383,8 +366,7 @@ const StudentPortal: React.FC = () => {
                 window.location.reload();
               }
             }}
-            className="p-1.5 bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-400 rounded-lg transition-colors border border-slate-700"
-            title="Disconnect"
+            className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
           >
             <XCircle size={16} />
           </button>
@@ -424,31 +406,26 @@ const StudentPortal: React.FC = () => {
                   {currentQuestion.text}
                 </h2>
 
-                <div className="grid gap-3">
+                <div className="grid gap-2">
                   {currentQuestion.options.map((opt, idx) => (
                     <button
                       key={idx}
                       onClick={() => !answered && handleSubmit(idx)}
                       disabled={answered}
-                      className={`group relative flex items-center justify-between p-5 rounded-[1.5rem] border-2 transition-all duration-300 transform active:scale-[0.98] ${selectedIdx === idx
-                        ? 'border-amber-600 bg-amber-50 shadow-md translate-x-1'
-                        : 'border-slate-100 bg-slate-50 hover:border-amber-200 hover:bg-white'
-                        } ${answered && selectedIdx !== idx ? 'opacity-40 grayscale' : ''}`}
+                      className={`relative flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${selectedIdx === idx
+                        ? 'border-amber-500 bg-amber-50 shadow-sm'
+                        : 'border-slate-100 bg-slate-50'
+                        } ${answered && selectedIdx !== idx ? 'opacity-30 grayscale' : ''}`}
                     >
-                      <div className="flex items-center gap-4">
-                        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all ${selectedIdx === idx ? 'bg-amber-600 text-white rotate-6' : 'bg-white text-slate-400 group-hover:bg-amber-100 group-hover:text-amber-600'
-                          }`}>
+                      <div className="flex items-center gap-3">
+                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs transition-all ${selectedIdx === idx ? 'bg-amber-500 text-white' : 'bg-white text-slate-400'}`}>
                           {String.fromCharCode(65 + idx)}
                         </span>
-                        <span className={`font-bold text-lg ${selectedIdx === idx ? 'text-amber-900' : 'text-slate-600'}`}>
+                        <span className={`font-bold text-sm ${selectedIdx === idx ? 'text-amber-900' : 'text-slate-600'}`}>
                           {opt}
                         </span>
                       </div>
-                      {selectedIdx === idx && (
-                        <div className="animate-in zoom-in spin-in-12 duration-300">
-                          <CheckCircle2 className="text-amber-600 shrink-0" size={24} />
-                        </div>
-                      )}
+                      {selectedIdx === idx && <CheckCircle2 className="text-amber-600" size={18} />}
                     </button>
                   ))}
                 </div>
@@ -487,13 +464,11 @@ const StudentPortal: React.FC = () => {
 
       {/* Roster & Waiting State */}
       {!currentQuestion && (
-        <div className="bg-white p-12 rounded-[3rem] shadow-sm border border-dashed border-slate-200 text-center space-y-4 animate-in fade-in duration-500">
-          <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto flex items-center justify-center shadow-inner">
-            <Loader2 className="animate-spin text-indigo-600" size={32} />
-          </div>
-          <div className="space-y-1">
-            <p className="font-black text-slate-800 uppercase tracking-tighter text-lg">Waiting for Instructor</p>
-            <p className="text-sm font-medium text-slate-400">Scanning mesh for next question pulse...</p>
+        <div className="bg-white p-8 rounded-3xl border border-slate-100 text-center space-y-3 animate-in fade-in duration-500">
+          <Loader2 className="animate-spin text-indigo-500 mx-auto" size={24} />
+          <div className="space-y-0.5">
+            <p className="font-black text-slate-800 uppercase tracking-tight text-sm">Awaiting Question</p>
+            <p className="text-[10px] font-medium text-slate-400">Scanning mesh for next pulse...</p>
           </div>
         </div>
       )}

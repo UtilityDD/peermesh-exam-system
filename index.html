@@ -5,77 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PeerMesh Exam System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      overflow-x: hidden;
-      overscroll-behavior-y: none;
-    }
-
-    .glass {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(8px);
-    }
-
-    /* Android Safe Areas */
-    :root {
-      --safe-top: env(safe-area-inset-top);
-      --safe-bottom: max(env(safe-area-inset-bottom), 16px);
-    }
-
-    /* Mobile-specific fallback for Android overlap issues */
-    @media (max-width: 768px) {
-      :root {
-        --safe-top: max(env(safe-area-inset-top), 35px);
-      }
-    }
-
-    .safe-area-top {
-      /* Status bar height + 16px content padding */
-      padding-top: calc(var(--safe-top) + 16px) !important;
-    }
-
-    .safe-area-bottom {
-      padding-bottom: var(--safe-bottom);
-    }
-
-    /* Allow selection only in inputs */
-    input,
-    textarea {
-      user-select: text;
-    }
-
-    /* Custom Animations */
-    @keyframes spin-slow {
-      from {
-        transform: rotate(0deg);
-      }
-
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .animate-spin-slow {
-      animation: spin-slow 8s linear infinite;
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
-  }
-}
-</script>
+  <link rel="icon" type="image/png" href="/logo.png">
 </head>
 
 <body class="bg-slate-50 text-slate-900">

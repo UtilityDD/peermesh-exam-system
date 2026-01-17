@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+
+@media (max-width: 768px) {
+    :root {
+        --safe-top: max(env(safe-area-inset-top), 35px);
+    }
+}
+
+html,
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+}
+
+.safe-area-top {
+    padding-top: calc(var(--safe-top) + 16px) !important;
+}
+
+.safe-area-bottom {
+    padding-bottom: var(--safe-bottom);
+}
+
+input,
+textarea {
+    user-select: text;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+@keyframes radar-sweep {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse-soft {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    10% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+.animate-radar-sweep {
+    animation: radar-sweep 4s linear infinite;
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-marquee {
+    animation: marquee 3s ease-in-out infinite;
+}
+
+.radar-gradient {
+    background: conic-gradient(from 0deg, transparent 0deg, transparent 300deg, rgba(99, 102, 241, 0.1) 360deg);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

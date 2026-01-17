@@ -61,7 +61,7 @@ const UserGuide: React.FC<UserGuideProps> = ({ onClose }) => {
                             </p>
                             <ul className="space-y-2">
                                 <li className="flex items-center gap-2 text-sm text-slate-500">
-                                    <ChevronRight size={14} className="text-pink-500" /> This method works even without actual cellular data!
+                                    <ChevronRight size={14} className="text-pink-500" /> Works even without cellular data (Handled via Local Mesh).
                                 </li>
                                 <li className="flex items-center gap-2 text-sm text-slate-500">
                                     <ChevronRight size={14} className="text-pink-500" /> Best for classroom environments.

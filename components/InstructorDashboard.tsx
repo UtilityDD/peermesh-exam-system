@@ -6,7 +6,7 @@ import { Question, ExamStatus, ConnectionMode, Student, StudentResponse } from '
 import AnimatedBackground from './AnimatedBackground';
 import {
   Plus, Play, Pause, ChevronRight, Users,
-  BarChart3, Settings, Wifi, Bluetooth, Zap,
+  BarChart3, Settings, Wifi, Bluetooth, Sparkles,
   QrCode, Loader2, CheckCircle2, XCircle, Copy, Clock,
   Edit2, Trash2, Save, X, RefreshCw, Signal,
   MessageCircle, Mail, FileQuestion, Smartphone, Check,
@@ -58,6 +58,7 @@ const InstructorDashboard: React.FC = () => {
   const [showTopicInput, setShowTopicInput] = useState(false);
   const [setupMode, setSetupMode] = useState<'choice' | 'manual' | 'ai' | null>(null);
   const [showImportGuide, setShowImportGuide] = useState(false);
+  const [viewingQuestion, setViewingQuestion] = useState<Question | null>(null);
   const [copied, setCopied] = useState(false);
   const [isSetupLocked, setIsSetupLocked] = useState(false);
   const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
@@ -100,6 +101,13 @@ const InstructorDashboard: React.FC = () => {
     const initMesh = async (existingId?: string) => {
       const id = await meshService.init(existingId);
       setPeerId(id);
+
+      // Set initial signal status based on ID type
+      if (id && (id.startsWith('LOCAL-') || id.startsWith('OFFLINE-') || id.startsWith('ERROR-'))) {
+        setSignalStatus('offline');
+      } else {
+        setSignalStatus('stable');
+      }
 
       meshService.onMessage((senderId, message) => {
         // ... message handling (unchanged)
@@ -198,25 +206,39 @@ const InstructorDashboard: React.FC = () => {
 
   const DEFAULT_QUESTIONS: Question[] = [
     {
-      id: 'm1',
-      text: 'What is the primary benefit of P2P networking in PeerMesh?',
-      options: ['Higher Cost', 'Offline Connectivity', 'Centralized Control', 'Slower Speed'],
-      correctIndex: 1,
-      timeLimit: 30
-    },
-    {
-      id: 'm2',
-      text: 'Which technology is used for real-time signaling in this app?',
-      options: ['PHP', 'PeerJS (WebRTC)', 'FTP', 'SQL'],
-      correctIndex: 1,
-      timeLimit: 45
-    },
-    {
-      id: 'm3',
-      text: 'What does PWA stand for?',
-      options: ['Permanent Web App', 'Power Web App', 'Progressive Web App', 'Private Web App'],
+      id: 'd1',
+      text: 'Why do programmers prefer dark mode?',
+      options: ['It looks cool', 'It saves battery', 'Light attracts bugs', 'They are nocturnal'],
       correctIndex: 2,
       timeLimit: 20
+    },
+    {
+      id: 'd2',
+      text: 'What is the "Answer to the Ultimate Question of Life, the Universe, and Everything"?',
+      options: ['Pizza', '42', 'Money', 'Sleep'],
+      correctIndex: 1,
+      timeLimit: 15
+    },
+    {
+      id: 'd3',
+      text: 'Which of these is a real programming language named after a gemstone?',
+      options: ['Diamond', 'Ruby', 'Emerald', 'Sapphire'],
+      correctIndex: 1,
+      timeLimit: 20
+    },
+    {
+      id: 'd4',
+      text: 'How many legs does a spider have? (No, they don\'t use code)',
+      options: ['6', '8', '10', 'None'],
+      correctIndex: 1,
+      timeLimit: 10
+    },
+    {
+      id: 'd5',
+      text: 'What happens if you type "do a barrel roll" in Google search?',
+      options: ['Google crashes', 'Nothing', 'The page rotates 360°', 'It shows airplanes'],
+      correctIndex: 2,
+      timeLimit: 25
     }
   ];
 
@@ -637,25 +659,25 @@ const InstructorDashboard: React.FC = () => {
         <div className="relative z-10 max-w-lg mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
 
           {/* 1. Connection & ID Section */}
-          <div className="bg-white/90 backdrop-blur-xl p-5 rounded-[1.5rem] shadow-lg border border-white/50 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-indigo-50 rounded-lg">
-                  {connMode === ConnectionMode.WIFI ? <Wifi size={16} className="text-indigo-600" /> : <Smartphone size={16} className="text-indigo-600" />}
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900">Mode</h3>
-                  <select
-                    value={connMode}
-                    onChange={(e) => setConnMode(e.target.value as ConnectionMode)}
-                    className="text-[10px] text-slate-500 bg-transparent outline-none cursor-pointer hover:text-indigo-600 transition-colors font-bold"
-                  >
-                    <option value={ConnectionMode.WIFI}>Wi-Fi / LAN</option>
-                    <option value={ConnectionMode.HOTSPOT}>Personal Hotspot</option>
-                  </select>
-                </div>
+          <div className="bg-white/95 backdrop-blur-xl p-4 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+              <div className="flex bg-slate-100/50 p-1 rounded-xl gap-1">
+                <button
+                  onClick={() => setConnMode(ConnectionMode.WIFI)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${connMode === ConnectionMode.WIFI ? 'bg-white text-indigo-600 shadow-sm font-black' : 'text-slate-400 font-bold hover:text-slate-600'}`}
+                >
+                  <Wifi size={12} />
+                  <span className="text-[10px] uppercase tracking-tighter">Wi-Fi</span>
+                </button>
+                <button
+                  onClick={() => setConnMode(ConnectionMode.HOTSPOT)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${connMode === ConnectionMode.HOTSPOT ? 'bg-white text-indigo-600 shadow-sm font-black' : 'text-slate-400 font-bold hover:text-slate-600'}`}
+                >
+                  <Smartphone size={12} />
+                  <span className="text-[10px] uppercase tracking-tighter">Hotspot</span>
+                </button>
               </div>
-              <div className={`w-2 h-2 rounded-full ${isMeshReady ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${isMeshReady ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-amber-500'}`} />
             </div>
 
             <div className="space-y-3">
@@ -670,24 +692,24 @@ const InstructorDashboard: React.FC = () => {
               <div className="grid grid-cols-3 gap-2">
                 <a
                   href={`whatsapp://send?text=Join%20my%20PeerMesh%20Exam!%20ID:%20${peerId}`}
-                  className="flex flex-col items-center justify-center gap-1 p-2 bg-[#25D366]/5 hover:bg-[#25D366]/10 text-[#25D366] rounded-xl transition-colors border border-[#25D366]/10"
+                  className="flex items-center justify-center gap-2 p-2.5 bg-[#25D366]/5 hover:bg-[#25D366]/10 text-[#25D366] rounded-xl transition-colors border border-[#25D366]/10"
                 >
                   <MessageCircle size={18} />
-                  <span className="text-[9px] font-bold">WhatsApp</span>
+                  <span className="text-[10px] font-bold hidden md:inline">WhatsApp</span>
                 </a>
                 <a
                   href={`mailto:?subject=PeerMesh Exam ID&body=Join using Mesh ID: ${peerId}`}
-                  className="flex flex-col items-center justify-center gap-1 p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-colors border border-blue-100"
+                  className="flex items-center justify-center gap-2 p-2.5 bg-blue-50/50 hover:bg-blue-100/50 text-blue-600 rounded-xl transition-colors border border-blue-100/50"
                 >
                   <Mail size={18} />
-                  <span className="text-[9px] font-bold">Email</span>
+                  <span className="text-[10px] font-bold hidden md:inline">Email</span>
                 </a>
                 <button
                   onClick={copyId}
-                  className="flex flex-col items-center justify-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition-colors border border-slate-200"
+                  className="flex items-center justify-center gap-2 p-2.5 bg-slate-50/50 hover:bg-slate-100/50 text-slate-600 rounded-xl transition-colors border border-slate-200/50"
                 >
                   {copied ? <Check size={18} /> : <Copy size={18} />}
-                  <span className="text-[9px] font-bold">{copied ? 'Copied' : 'Copy'}</span>
+                  <span className="text-[10px] font-bold hidden md:inline">{copied ? 'Copied' : 'Copy ID'}</span>
                 </button>
               </div>
             </div>
@@ -698,38 +720,41 @@ const InstructorDashboard: React.FC = () => {
             {!setupMode ? (
               <button
                 onClick={() => setSetupMode('choice')}
-                className="w-full bg-white p-5 rounded-[2rem] shadow-xl border border-slate-100 hover:border-indigo-200 hover:shadow-2xl transition-all group text-left flex items-center justify-between"
+                className="w-full bg-white p-4 rounded-3xl shadow-sm border border-slate-100 hover:border-indigo-100 transition-all group text-left flex items-center justify-between"
               >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                    <FileQuestion size={24} />
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <FileQuestion size={20} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">Setup Questions</h3>
-                    <p className="text-xs text-slate-500">Create manually or generate with AI</p>
+                    <h3 className="text-sm font-bold text-slate-900">Setup Questions</h3>
+                    <p className="text-[10px] text-slate-400">Manual or AI-powered</p>
                   </div>
                 </div>
-                <ChevronRight size={20} className="text-slate-300 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={16} className="text-slate-300" />
               </button>
             ) : setupMode === 'choice' ? (
-              <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="grid grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
                 <button
                   onClick={() => setSetupMode('manual')}
-                  className="flex flex-col items-center gap-3 p-6 bg-white border border-slate-200 rounded-[2rem] hover:border-indigo-600 hover:bg-indigo-50 transition-all text-slate-700 group"
+                  className="flex flex-col items-center gap-2 py-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-200 transition-all text-slate-600"
                 >
-                  <div className="p-3 bg-slate-100 rounded-2xl group-hover:bg-indigo-100 group-hover:text-indigo-600">
-                    <Edit2 size={24} />
-                  </div>
-                  <span className="font-bold">Manual Setting</span>
+                  <Edit2 size={18} />
+                  <span className="text-[10px] font-bold">Manual</span>
                 </button>
                 <button
                   onClick={() => setSetupMode('ai')}
-                  className="flex flex-col items-center gap-3 p-6 bg-white border border-slate-200 rounded-[2rem] hover:border-indigo-600 hover:bg-indigo-50 transition-all text-slate-700 group"
+                  className="flex flex-col items-center gap-2 py-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-200 transition-all text-slate-600"
                 >
-                  <div className="p-3 bg-slate-100 rounded-2xl group-hover:bg-indigo-100 group-hover:text-indigo-600">
-                    <Zap size={24} />
-                  </div>
-                  <span className="font-bold">AI Mode</span>
+                  <Sparkles size={18} className="text-indigo-500" />
+                  <span className="text-[10px] font-bold">AI Mode</span>
+                </button>
+                <button
+                  onClick={useManualQuestions}
+                  className="flex flex-col items-center gap-2 py-4 bg-indigo-600 border border-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-100"
+                >
+                  <Play size={18} fill="currentColor" />
+                  <span className="text-[10px] font-bold">Demo</span>
                 </button>
               </div>
             ) : setupMode === 'ai' ? (
@@ -757,31 +782,30 @@ const InstructorDashboard: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white/90 backdrop-blur-md p-4 rounded-[2rem] border border-slate-100 shadow-xl space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-center justify-between px-2">
-                  <h3 className="font-black text-slate-900 flex items-center gap-2">
-                    <FileQuestion size={18} className="text-indigo-600" />
-                    Question List
+              <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 uppercase tracking-tighter">
+                    <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                    Questions
                   </h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setShowImportGuide(true)}
-                      title="Import Guide"
                       disabled={isSetupLocked}
-                      className={`p-1.5 transition-colors ${isSetupLocked ? 'opacity-30 cursor-not-allowed' : 'text-slate-400 hover:text-indigo-600'}`}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-20"
                     >
-                      <HelpCircle size={16} />
+                      <HelpCircle size={14} />
                     </button>
-                    <label className={`p-1.5 bg-indigo-50 text-indigo-600 rounded-lg transition-colors shadow-sm ${isSetupLocked ? 'opacity-30 cursor-not-allowed' : 'hover:bg-indigo-100 cursor-pointer'}`}>
-                      <Upload size={16} />
+                    <label className={`p-2 bg-indigo-50 text-indigo-600 rounded-xl shadow-sm ${isSetupLocked ? 'opacity-20' : 'hover:bg-indigo-100 cursor-pointer'}`}>
+                      <Upload size={14} />
                       <input type="file" accept=".json,.csv" className="hidden" onChange={handleImportFile} disabled={isSetupLocked} />
                     </label>
                     <button
                       onClick={() => openEditor(null)}
                       disabled={isSetupLocked}
-                      className={`p-1.5 bg-indigo-600 text-white rounded-lg transition-colors shadow-lg shadow-indigo-100 ${isSetupLocked ? 'opacity-30 cursor-not-allowed' : 'hover:bg-indigo-700'}`}
+                      className={`p-2 bg-indigo-600 text-white rounded-xl shadow-md ${isSetupLocked ? 'opacity-20' : 'hover:bg-indigo-700'}`}
                     >
-                      <Plus size={16} />
+                      <Plus size={14} />
                     </button>
                   </div>
                 </div>
@@ -793,7 +817,11 @@ const InstructorDashboard: React.FC = () => {
                     </div>
                   ) : (
                     questions.map((q, idx) => (
-                      <div key={q.id} className="group bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-indigo-100 transition-all">
+                      <div
+                        key={q.id}
+                        onClick={() => setViewingQuestion(q)}
+                        className="group bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-indigo-100 transition-all cursor-pointer"
+                      >
                         <div className="flex justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-bold text-slate-800 line-clamp-2">{q.text}</p>
@@ -805,8 +833,24 @@ const InstructorDashboard: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => openEditor(idx)} className="p-1.5 bg-white text-slate-600 rounded-lg hover:text-indigo-600 border border-slate-200 shadow-sm"><Edit2 size={12} /></button>
-                            <button onClick={() => deleteQuestion(idx)} className="p-1.5 bg-white text-rose-500 rounded-lg hover:bg-rose-50 border border-rose-100 shadow-sm"><Trash2 size={12} /></button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditor(idx);
+                              }}
+                              className="p-1.5 bg-white text-slate-600 rounded-lg hover:text-indigo-600 border border-slate-200 shadow-sm"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteQuestion(idx);
+                              }}
+                              className="p-1.5 bg-white text-rose-500 rounded-lg hover:bg-rose-50 border border-rose-100 shadow-sm"
+                            >
+                              <Trash2 size={12} />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -902,42 +946,79 @@ const InstructorDashboard: React.FC = () => {
               </div>
 
               {status === ExamStatus.STARTING && (
-                <div className="text-center py-4 space-y-12 animate-in fade-in zoom-in duration-500">
-                  {/* Tiny minimalist ID headern */}
-                  <div className="inline-flex items-center gap-4 bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-200/50 shadow-sm mx-auto">
-                    <div className="flex items-center gap-2 border-r border-slate-200 pr-3">
-                      <span className="text-[9px] font-black text-slate-400 ppercase tracking-tighter">MESH ID</span>
-                      <span className="font-mono text-xs font-black text-indigo-600 tracking-tighter">{peerId}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <a href={`whatsapp://send?text=Join%20my%20PeerMesh%20Exam!%20ID:%20${peerId}`} className="p-1 text-[#25D366] hover:bg-[#25D366]/10 rounded-md transition-colors">
-                        <MessageCircle size={14} />
-                      </a>
-                      <a href={`mailto:?subject=PeerMesh Exam ID&body=Join using Mesh ID: ${peerId}`} className="p-1 text-blue-600 hover:bg-blue-100 rounded-md transition-colors">
-                        <Mail size={14} />
-                      </a>
-                      <button onClick={copyId} className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors">
-                        {copied ? <Check size={14} /> : <Copy size={14} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="relative w-40 h-40 mx-auto">
-                      <div className="absolute inset-0 border-2 border-indigo-200 rounded-full animate-ping opacity-20"></div>
-                      <div className="absolute inset-8 border-2 border-indigo-300 rounded-full animate-ping delay-150 opacity-10"></div>
-                      <div className="relative z-10 w-full h-full bg-gradient-to-br from-indigo-50 to-white rounded-full flex items-center justify-center border border-indigo-100 shadow-inner">
-                        <Users size={56} className="text-indigo-600 opacity-90" />
+                <div className="text-center py-6 space-y-10 animate-in fade-in zoom-in duration-500 max-w-md mx-auto">
+                  {/* Dense minimalist header */}
+                  <div className="space-y-3">
+                    <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-2xl shadow-lg border border-slate-800">
+                      <span className="text-[10px] font-black opacity-50 uppercase tracking-tighter">MESH ID:</span>
+                      <span className="font-mono text-sm font-black tracking-tighter text-indigo-400">{peerId}</span>
+                      <div className="flex items-center gap-1 ml-2 border-l border-white/10 pl-2">
+                        <button onClick={copyId} className="p-1 hover:bg-white/10 rounded-md transition-colors">
+                          {copied ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
                       </div>
                     </div>
-                    <div>
-                      <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Awaiting students...</h2>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2">{questions.length} Questions Loaded & Locked</p>
-                    </div>
                   </div>
 
-                  {/* 2. Start Action */}
-                  <div className="max-w-lg mx-auto space-y-3">
+                  {/* Modern Radar Animation Container */}
+                  <div className="relative w-64 h-64 mx-auto flex items-center justify-center">
+                    {/* Concentric mapping rings */}
+                    <div className="absolute inset-0 border border-indigo-500/10 rounded-full"></div>
+                    <div className="absolute inset-8 border border-indigo-500/10 rounded-full"></div>
+                    <div className="absolute inset-16 border border-indigo-500/20 rounded-full"></div>
+
+                    {/* Rotating sweep line */}
+                    <div className="absolute inset-0 animate-radar-sweep radar-gradient rounded-full"></div>
+                    <div className="absolute top-0 left-1/2 w-[1px] h-1/2 bg-indigo-500/30 origin-bottom animate-radar-sweep"></div>
+
+                    {/* Dynamic Student Pips (Dots) */}
+                    <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl border border-slate-100">
+                      <div className="text-center">
+                        <p className="text-4xl font-black text-slate-900 tracking-tighter">{students.length}</p>
+                        <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mt-0.5">Connected</p>
+                      </div>
+                    </div>
+
+                    {/* Randomized Student Pips based on student count */}
+                    {students.map((s, idx) => {
+                      // Deterministic but "random" looking positions
+                      const angle = (idx * 137.5) % 360;
+                      const distance = 40 + (idx * 7) % 80;
+                      return (
+                        <div
+                          key={s.id}
+                          className="absolute w-2.5 h-2.5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.8)] border border-white animate-pulse-soft"
+                          style={{
+                            transform: `rotate(${angle}deg) translateY(-${distance}px)`
+                          }}
+                        ></div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Student Name Log (Marquee / Scroll) */}
+                  <div className="h-16 overflow-hidden relative">
+                    {students.length > 0 ? (
+                      <div className="space-y-1">
+                        {students.slice(-2).map((s, idx) => (
+                          <div key={s.id} className="animate-in slide-in-from-bottom-2 fade-in duration-500">
+                            <p className="text-sm font-bold text-slate-800">
+                              <span className="text-emerald-500 mr-2">●</span>
+                              {s.name} <span className="text-[10px] text-slate-400 font-normal">joined the mesh</span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="animate-pulse">
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Scanning local field...</p>
+                        <p className="text-[9px] text-slate-300">Instruct students to join with the Mesh ID</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Start Action */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 rounded-full">
                       <span className="text-[9px] font-bold text-slate-500 uppercase">Connected Students</span>
                       <div className="flex items-center gap-1.5">
@@ -1043,62 +1124,46 @@ const InstructorDashboard: React.FC = () => {
                   </div>
 
                   {/* Status Indicator Tabs */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className={`flex-1 flex items-center justify-between px-5 py-3 rounded-2xl border transition-all ${isAutomated ? 'bg-indigo-600 border-indigo-700 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-500'}`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${isAutomated ? 'bg-white/20' : 'bg-slate-200'}`}>
-                          <Zap size={16} />
+                  <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-sm border border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <RefreshCw size={12} className={`text-indigo-400 ${isAutomated ? 'animate-spin-slow' : ''}`} />
+                          <p className="text-[10px] font-black uppercase tracking-tight">System: {isAutomated ? 'Auto' : 'Manual'}</p>
                         </div>
-                        <div>
-                          <p className={`text-[10px] font-black uppercase tracking-widest ${isAutomated ? 'opacity-80' : 'text-slate-400'}`}>Automation</p>
-                          <p className="text-xs font-bold">{isAutomated ? 'Auto Mode ON' : 'Manual Push'}</p>
-                        </div>
-                      </div>
-                      <div className={`w-2 h-2 rounded-full ${isAutomated ? 'bg-white animate-pulse' : 'bg-slate-300'}`} />
-                    </div>
-
-                    <div className={`flex-1 flex items-center justify-between px-5 py-3 rounded-2xl border transition-all ${isRandomizedSequence ? 'bg-violet-600 border-violet-700 text-white shadow-lg shadow-violet-100' : 'bg-slate-50 border-slate-100 text-slate-500'}`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${isRandomizedSequence ? 'bg-white/20' : 'bg-slate-200'}`}>
-                          <Shuffle size={16} />
-                        </div>
-                        <div>
-                          <p className={`text-[10px] font-black uppercase tracking-widest ${isRandomizedSequence ? 'opacity-80' : 'text-slate-400'}`}>Sequence</p>
-                          <p className="text-xs font-bold">{isRandomizedSequence ? 'Randomized' : 'Sequential'}</p>
+                        <div className="flex items-center gap-2">
+                          <Shuffle size={12} className="text-amber-400" />
+                          <p className="text-[10px] font-black uppercase tracking-tight">Order: {isRandomizedSequence ? 'Rand' : 'Seq'}</p>
                         </div>
                       </div>
-                      <div className={`w-2 h-2 rounded-full ${isRandomizedSequence ? 'bg-white' : 'bg-slate-300'}`} />
+                      <div className={`w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]`} />
                     </div>
                   </div>
 
                   {/* Dynamic View based on Automation */}
                   <div className="mt-8">
                     {isAutomated ? (
-                      <div className="text-center py-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
-                        <div className="relative w-24 h-24 mx-auto">
-                          <div className="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-10"></div>
-                          <div className="relative z-10 w-full h-full bg-indigo-50 rounded-full flex items-center justify-center border-2 border-indigo-100">
-                            <RefreshCw size={40} className="text-indigo-600 animate-spin-slow" />
+                      <div className="text-center py-8 bg-white rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                        <div className="relative w-16 h-16 mx-auto">
+                          <div className="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-5"></div>
+                          <div className="relative z-10 w-full h-full bg-indigo-50 rounded-full flex items-center justify-center border border-indigo-100">
+                            <RefreshCw size={24} className="text-indigo-600 animate-spin-slow" />
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <h2 className="text-2xl font-black text-slate-900 tracking-tight">System Pushing Mesh</h2>
-                          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-4 py-1.5 rounded-full inline-block">Question {currentQ + 1} of {questions.length}</p>
-                          <p className="text-xs text-slate-500 max-w-[300px] mx-auto leading-relaxed mt-4">The mesh system is delivering questions individually. Watch live student terminal progress in the roster.</p>
+                        <div className="space-y-1 px-4">
+                          <h2 className="text-xl font-black text-slate-900">Pushing Questions</h2>
+                          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Question {currentQ + 1} / {questions.length}</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                        <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                          <div>
-                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Manual Track Controller</span>
-                            <h3 className="text-2xl font-black text-slate-900 mt-2">Current Question</h3>
-                          </div>
+                      <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                          <h3 className="text-lg font-black text-slate-900">Current Question</h3>
                           <button
                             onClick={nextQuestion}
-                            className="group flex items-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-2xl hover:bg-indigo-700 transition-all font-black shadow-xl shadow-indigo-100"
+                            className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl transition-all font-black text-xs shadow-md shadow-indigo-100 flex items-center gap-2"
                           >
-                            Broadcast Next <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            Next <ChevronRight size={14} />
                           </button>
                         </div>
 
@@ -1132,52 +1197,42 @@ const InstructorDashboard: React.FC = () => {
               )}
 
               {status === ExamStatus.COMPLETED && (
-                <div className="text-center py-12 space-y-8 animate-in fade-in zoom-in duration-700">
-                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-green-100/50">
-                    <CheckCircle2 size={48} className="text-green-600" />
+                <div className="text-center py-8 space-y-6 animate-in fade-in zoom-in duration-700">
+                  <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+                    <CheckCircle2 size={32} className="text-emerald-600" />
                   </div>
-                  <div className="space-y-2">
-                    <h2 className="text-4xl font-black text-slate-900">Exam Concluded!</h2>
-                    <p className="text-slate-500">All questions have been delivered. What would you like to do next?</p>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Exam Ended</h2>
+                    <p className="text-xs text-slate-500">Wait for all responses or publish now.</p>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto">
+                  <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
                     <button
                       onClick={() => publishResults(true)}
-                      className="group flex flex-col items-center gap-3 p-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[2rem] transition-all shadow-xl shadow-indigo-100"
+                      className="p-4 bg-indigo-600 text-white rounded-2xl transition-all shadow-md font-bold text-xs uppercase"
                     >
-                      <Zap size={24} className="group-hover:scale-110 transition-transform" />
-                      <div>
-                        <p className="font-bold">Publish Instantly</p>
-                        <p className="text-[10px] text-indigo-100 uppercase font-black">Students see scores now</p>
-                      </div>
+                      Publish
                     </button>
-
                     <button
                       onClick={() => publishResults(false)}
-                      className="group flex flex-col items-center gap-3 p-6 bg-white border-2 border-slate-100 hover:border-indigo-200 text-slate-700 rounded-[2rem] transition-all"
+                      className="p-4 bg-white border border-slate-100 text-slate-600 rounded-2xl transition-all font-bold text-xs uppercase"
                     >
-                      <Clock size={24} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                      <div>
-                        <p className="font-bold">Hold Results</p>
-                        <p className="text-[10px] text-slate-400 uppercase font-black">"Waiting" msg to students</p>
-                      </div>
+                      Hold
                     </button>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex items-center gap-3 max-w-sm mx-auto">
                     <button
                       onClick={() => setShowAdvancedAnalytics(true)}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black hover:bg-indigo-100 transition-all border-2 border-indigo-100"
+                      className="flex-1 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-black text-[10px] uppercase hover:bg-indigo-100 border border-indigo-100"
                     >
-                      <BarChart3 size={20} />
-                      Practical Analysis
+                      Analysis
                     </button>
                     <button
                       onClick={resetSession}
-                      className="flex-1 px-10 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform"
+                      className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-wider"
                     >
-                      Start New Exam
+                      New Session
                     </button>
                   </div>
                 </div>
@@ -1471,6 +1526,70 @@ const InstructorDashboard: React.FC = () => {
             >
               Got it!
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Question Detail View Modal */}
+      {viewingQuestion && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setViewingQuestion(null)} />
+          <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
+            <div className="p-8 space-y-6">
+              <div className="flex justify-between items-start gap-4">
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                  <FileQuestion size={24} />
+                </div>
+                <button
+                  onClick={() => setViewingQuestion(null)}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  <X size={20} className="text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full">Question Preview</span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400"><Clock size={12} /> {viewingQuestion.timeLimit}s Limit</span>
+                </div>
+                <h3 className="text-xl font-black text-slate-900 leading-tight">
+                  {viewingQuestion.text}
+                </h3>
+              </div>
+
+              <div className="grid gap-3">
+                {viewingQuestion.options.map((opt, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border ${idx === viewingQuestion.correctIndex
+                      ? 'bg-emerald-50 border-emerald-200'
+                      : 'bg-slate-50 border-slate-100'
+                      }`}
+                  >
+                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${idx === viewingQuestion.correctIndex
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-white text-slate-400'
+                      }`}>
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className={`font-bold text-sm ${idx === viewingQuestion.correctIndex ? 'text-emerald-900' : 'text-slate-600'}`}>
+                      {opt}
+                    </span>
+                    {idx === viewingQuestion.correctIndex && (
+                      <CheckCircle2 size={16} className="ml-auto text-emerald-500" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setViewingQuestion(null)}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
       )}
