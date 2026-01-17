@@ -1735,7 +1735,7 @@ const InstructorDashboard: React.FC = () => {
                     <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white space-y-6">
                       <div className="flex justify-between items-start">
                         <h3 className="text-xl font-black">Quick Summary</h3>
-                        <Zap size={24} className="opacity-50" />
+                        <Sparkles size={24} className="opacity-50" />
                       </div>
                       <p className="text-sm text-indigo-100 opacity-90 leading-relaxed font-medium">
                         The exam session on "{topic || 'Untitled'}" saw a {sessionOverview.participationRate}% participation rate.
