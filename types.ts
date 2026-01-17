@@ -21,6 +21,7 @@ export interface Question {
   options: string[];
   correctIndex: number;
   timeLimit?: number; // duration in seconds
+  points?: number; // marks for this question
 }
 
 export interface StudentResponse {

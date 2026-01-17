@@ -69,7 +69,8 @@ const InstructorDashboard: React.FC = () => {
     text: '',
     options: ['', '', '', ''],
     correctIndex: 0,
-    timeLimit: 30
+    timeLimit: 30,
+    points: 10
   });
 
   const questionsRef = useRef<Question[]>([]);
@@ -135,7 +136,9 @@ const InstructorDashboard: React.FC = () => {
           setResponses(prev => [...prev, resp]);
           setStudents(prev => prev.map(s => {
             if (s.id === resp.studentId) {
-              return { ...s, score: s.score + (resp.isCorrect ? 10 : 0), status: 'done' };
+              const q = questionsRef.current.find(q => q.id === resp.questionId);
+              const points = q?.points || 10; // Default to 10 if not set
+              return { ...s, score: s.score + (resp.isCorrect ? points : 0), status: 'done' };
             }
             return s;
           }));
@@ -461,7 +464,9 @@ const InstructorDashboard: React.FC = () => {
     setResponses(prev => [...prev, newResponse]);
     setStudents(prev => prev.map(s => {
       if (s.id === studentId) {
-        return { ...s, score: s.score + (isCorrect ? 10 : 0), status: 'done' };
+        const q = questions.find(q => q.id === qId);
+        const points = q?.points || 10;
+        return { ...s, score: s.score + (isCorrect ? points : 0), status: 'done' };
       }
       return s;
     }));
@@ -829,8 +834,11 @@ const InstructorDashboard: React.FC = () => {
                             <p className="text-xs font-bold text-slate-800 truncate">{q.text}</p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                              <Clock size={10} strokeWidth={3} /> {q.timeLimit}s
+                            <span className="text-[10px] font-black text-indigo-500 uppercase flex items-center gap-1">
+                              <Clock size={10} /> {q.timeLimit}s
+                            </span>
+                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                              {q.points || 10} pts
                             </span>
                             <span className="text-[10px] font-bold text-slate-400">{q.options.length} Options</span>
                           </div>
@@ -1437,16 +1445,28 @@ const InstructorDashboard: React.FC = () => {
             </div>
 
             {/* Bottom Actions */}
-            <div className="px-5 py-5 sm:px-10 sm:py-8 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-0">
-              <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm w-full sm:w-auto">
-                <Clock size={16} className="text-slate-400" />
-                <input
-                  type="number"
-                  className="flex-1 sm:w-12 bg-transparent font-black text-slate-800 outline-none text-center"
-                  value={editForm.timeLimit}
-                  onChange={e => setEditForm(prev => ({ ...prev, timeLimit: parseInt(e.target.value) }))}
-                />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sec</span>
+            <div className="px-4 py-4 sm:px-10 sm:py-8 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 sticky bottom-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-2 bg-white px-3 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex-1 sm:flex-none justify-center">
+                  <Clock size={14} className="text-slate-400" />
+                  <input
+                    type="number"
+                    className="w-10 sm:w-12 bg-transparent font-black text-slate-800 outline-none text-center p-0"
+                    value={editForm.timeLimit}
+                    onChange={e => setEditForm(prev => ({ ...prev, timeLimit: parseInt(e.target.value) }))}
+                  />
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sec</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white px-3 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex-1 sm:flex-none justify-center">
+                  <span className="text-[10px] text-emerald-600 font-black uppercase tracking-widest">Pts</span>
+                  <input
+                    type="number"
+                    className="w-10 sm:w-12 bg-transparent font-black text-slate-800 outline-none text-center p-0"
+                    value={editForm.points || 10}
+                    onChange={e => setEditForm(prev => ({ ...prev, points: parseInt(e.target.value) }))}
+                  />
+                </div>
               </div>
 
               <button
