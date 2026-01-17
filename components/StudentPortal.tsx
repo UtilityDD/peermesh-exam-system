@@ -223,10 +223,22 @@ const StudentPortal: React.FC = () => {
 
           {resultData?.published && (
             <div className="space-y-6">
-              <div className="bg-indigo-600 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white shadow-xl shadow-indigo-100">
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-widest opacity-70 mb-1">Your Total Score</p>
-                <p className="text-4xl md:text-6xl font-black">100%</p>
-              </div>
+              {(() => {
+                const myResults = resultData.allResults?.find((s: any) => s.id === meshService.getPeerId());
+                return (
+                  <div className="bg-indigo-600 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white shadow-xl shadow-indigo-100">
+                    <p className="text-[10px] md:text-xs font-black uppercase tracking-widest opacity-70 mb-1">Your Performance</p>
+                    <div className="flex items-baseline gap-2 justify-center">
+                      <p className="text-4xl md:text-6xl font-black">{myResults?.percentage || 0}%</p>
+                      <p className="text-sm font-bold opacity-60">Accuracy</p>
+                    </div>
+                    <div className="flex items-center justify-center gap-4 mt-4 text-[10px] font-black uppercase tracking-widest text-indigo-100">
+                      <span className="bg-white/10 px-3 py-1 rounded-full">{myResults?.correct || 0} Correct</span>
+                      <span className="bg-white/10 px-3 py-1 rounded-full">{myResults?.wrong || 0} Wrong</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="text-left space-y-4">
                 <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest px-4">Class Leaderboard</h3>

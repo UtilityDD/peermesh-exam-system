@@ -401,6 +401,7 @@ const InstructorDashboard: React.FC = () => {
           .sort((a, b) => b.score - a.score)
           .slice(0, 10)
           .map(s => ({ name: s.name, score: s.score })),
+        allResults: studentAnalytics,
         message: instantly ? 'Results published!' : 'Results will be published shortly.'
       }
     });
@@ -810,48 +811,45 @@ const InstructorDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                <div className="max-h-[350px] overflow-y-auto space-y-1.5 pr-2 scrollbar-none">
                   {questions.length === 0 ? (
-                    <div className="text-center py-8 text-slate-400 italic text-sm">
-                      No questions added yet.
+                    <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                      <HelpCircle size={32} className="mx-auto text-slate-300 mb-2 opacity-50" />
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Draft Empty</p>
                     </div>
                   ) : (
                     questions.map((q, idx) => (
                       <div
                         key={q.id}
-                        onClick={() => setViewingQuestion(q)}
-                        className="group bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-indigo-100 transition-all cursor-pointer"
+                        className="group bg-white p-3.5 rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all cursor-default flex items-center justify-between gap-4"
                       >
-                        <div className="flex justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-slate-800 line-clamp-2">{q.text}</p>
-                            <div className="flex items-center gap-3 mt-2">
-                              <span className="text-[10px] font-black text-indigo-500 uppercase flex items-center gap-1">
-                                <Clock size={10} /> {q.timeLimit}s
-                              </span>
-                              <span className="text-[10px] font-bold text-slate-400">{q.options.length} options</span>
-                            </div>
+                        <div className="flex-1 min-w-0" onClick={() => setViewingQuestion(q)}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">Q{idx + 1}</span>
+                            <p className="text-xs font-bold text-slate-800 truncate">{q.text}</p>
                           </div>
-                          <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openEditor(idx);
-                              }}
-                              className="p-1.5 bg-white text-slate-600 rounded-lg hover:text-indigo-600 border border-slate-200 shadow-sm"
-                            >
-                              <Edit2 size={12} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteQuestion(idx);
-                              }}
-                              className="p-1.5 bg-white text-rose-500 rounded-lg hover:bg-rose-50 border border-rose-100 shadow-sm"
-                            >
-                              <Trash2 size={12} />
-                            </button>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                              <Clock size={10} strokeWidth={3} /> {q.timeLimit}s
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">{q.options.length} Options</span>
                           </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => openEditor(idx)}
+                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            onClick={() => deleteQuestion(idx)}
+                            className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </div>
                     ))
@@ -1371,91 +1369,93 @@ const InstructorDashboard: React.FC = () => {
 
       {/* Question Editor Modal */}
       {showEditor && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={() => setShowEditor(false)} />
+        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setShowEditor(false)} />
 
-          <div className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
-            <div className="bg-indigo-600 p-4 md:p-6 text-white flex justify-between items-center flex-shrink-0">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="p-2 bg-white/20 rounded-xl flex-shrink-0">
-                  {editingQIndex !== null ? <Edit2 size={18} className="md:w-5 md:h-5" /> : <Plus size={18} className="md:w-5 md:h-5" />}
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg md:text-xl font-black truncate">{editingQIndex !== null ? 'Edit Question' : 'New Question'}</h2>
-                  <p className="text-[10px] md:text-xs text-indigo-100 opacity-80 uppercase tracking-widest font-bold">Manual Draft</p>
-                </div>
+          <div className="relative bg-white w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 duration-500 border-t sm:border border-slate-100">
+            {/* Minimalist Sub-Header */}
+            <div className="px-6 py-4 sm:py-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900">{editingQIndex !== null ? 'Edit Question' : 'New Question'}</h2>
+                <p className="text-[9px] sm:text-[10px] text-indigo-600 font-bold uppercase tracking-widest mt-0.5">Level: Manual Draft</p>
               </div>
               <button
                 onClick={() => setShowEditor(false)}
-                className="p-2 hover:bg-white/20 rounded-xl transition-colors flex-shrink-0"
+                className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
               >
                 <X size={20} />
               </button>
             </div>
-            <div className="p-4 md:p-8 space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(90vh-100px)]  scrollbar-thin scrollbar-thumb-slate-200">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Question Text</label>
+
+            <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-160px)] scrollbar-none">
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Content</label>
                 <textarea
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-lg font-bold min-h-[100px]"
-                  placeholder="Enter your question here..."
+                  className="w-full p-4 sm:p-6 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-100 outline-none text-lg sm:text-xl font-bold min-h-[100px] sm:min-h-[120px] transition-all placeholder:text-slate-300"
+                  placeholder="What is your question?"
                   value={editForm.text}
                   onChange={e => setEditForm(prev => ({ ...prev, text: e.target.value }))}
                 />
               </div>
 
-              <div className="grid gap-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Answer Options</label>
-                {editForm.options?.map((opt, idx) => (
-                  <div key={idx} className="flex gap-3">
-                    <button
-                      onClick={() => setEditForm(prev => ({ ...prev, correctIndex: idx }))}
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center font-black transition-all border-2 ${editForm.correctIndex === idx
-                        ? 'bg-emerald-500 border-emerald-600 text-white shadow-lg shadow-emerald-100'
-                        : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-emerald-200'
+              <div className="space-y-3.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Answer Options</label>
+                <div className="grid gap-2.5 sm:gap-3">
+                  {editForm.options?.map((opt, idx) => (
+                    <div
+                      key={idx}
+                      className={`group flex items-center gap-3 sm:gap-4 p-1.5 sm:p-2 pl-3 sm:pl-4 rounded-2xl border-2 transition-all ${editForm.correctIndex === idx
+                        ? 'border-indigo-600 bg-indigo-50/50'
+                        : 'border-slate-50 bg-slate-50/50 hover:border-slate-200'
                         }`}
                     >
-                      {String.fromCharCode(65 + idx)}
-                    </button>
-                    <input
-                      type="text"
-                      className={`flex-1 px-5 py-3 rounded-xl border-2 transition-all outline-none font-medium ${editForm.correctIndex === idx ? 'border-emerald-100 bg-emerald-50/30' : 'border-slate-100 bg-slate-50 focus:border-indigo-200'
-                        }`}
-                      placeholder={`Option ${String.fromCharCode(65 + idx)}`}
-                      value={opt}
-                      onChange={e => {
-                        const newOpts = [...(editForm.options || [])];
-                        newOpts[idx] = e.target.value;
-                        setEditForm(prev => ({ ...prev, options: newOpts }));
-                      }}
-                    />
-                  </div>
-                ))}
+                      <button
+                        onClick={() => setEditForm(prev => ({ ...prev, correctIndex: idx }))}
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-black transition-all ${editForm.correctIndex === idx
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                          : 'bg-white text-slate-400 group-hover:bg-slate-200'
+                          }`}
+                      >
+                        {String.fromCharCode(65 + idx)}
+                      </button>
+                      <input
+                        type="text"
+                        className="flex-1 bg-transparent border-none outline-none font-bold text-sm sm:text-base text-slate-800 placeholder:text-slate-300"
+                        placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                        value={opt}
+                        onChange={e => {
+                          const newOpts = [...(editForm.options || [])];
+                          newOpts[idx] = e.target.value;
+                          setEditForm(prev => ({ ...prev, options: newOpts }));
+                        }}
+                      />
+                      {editForm.correctIndex === idx && <Check size={18} className="mr-2 text-indigo-600 animate-in zoom-in" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="px-5 py-5 sm:px-10 sm:py-8 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-0">
+              <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm w-full sm:w-auto">
+                <Clock size={16} className="text-slate-400" />
+                <input
+                  type="number"
+                  className="flex-1 sm:w-12 bg-transparent font-black text-slate-800 outline-none text-center"
+                  value={editForm.timeLimit}
+                  onChange={e => setEditForm(prev => ({ ...prev, timeLimit: parseInt(e.target.value) }))}
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sec</span>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <div className="flex items-center gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Time Limit</label>
-                    <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-                      <Clock size={16} className="text-slate-400" />
-                      <input
-                        type="number"
-                        className="w-12 bg-transparent font-black text-indigo-600 outline-none"
-                        value={editForm.timeLimit}
-                        onChange={e => setEditForm(prev => ({ ...prev, timeLimit: parseInt(e.target.value) }))}
-                      />
-                      <span className="text-xs font-bold text-slate-400 uppercase">Sec</span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={saveQuestion}
-                  className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all flex items-center gap-2"
-                >
-                  <Save size={20} />
-                  Save Changes
-                </button>
-              </div>
+              <button
+                onClick={saveQuestion}
+                className="w-full sm:w-auto bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-indigo-100/50 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+              >
+                <Save size={18} />
+                Save Question
+              </button>
             </div>
           </div>
         </div>
