@@ -1,25 +1,24 @@
-
 // Theme configuration for PeerMesh
-// Academic Wisdom Theme - Navy Blue + Gold with Cyan accent
+// Trust & Discipline Theme - Forest Green + Sand + Ink Black
 
 export const theme = {
     // Primary colors
     primary: {
-        main: '#1e3a8a',      // Deep Navy Blue
-        light: '#3b82f6',     // Lighter blue for hover states
-        dark: '#1e40af',      // Darker navy
+        main: '#2e7d32',      // Forest Green (Trust)
+        light: '#4ade80',     // Fresh Green
+        dark: '#14532d',      // Deep Forest
     },
 
     // Secondary colors
     secondary: {
-        main: '#f59e0b',      // Rich Gold
-        light: '#fbbf24',     // Lighter gold
-        dark: '#d97706',      // Deeper gold
+        main: '#f59e0b',      // Amber (retained for highlights)
+        light: '#fbbf24',     // Lighter amber
+        dark: '#d97706',      // Deep amber
     },
 
     // Accent color
     accent: {
-        main: '#06b6d4',      // Bright Cyan
+        main: '#06b6d4',      // Cyan (retained for contrast)
         light: '#22d3ee',     // Light cyan
         dark: '#0891b2',      // Deep cyan
     },

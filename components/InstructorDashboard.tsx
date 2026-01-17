@@ -1647,34 +1647,26 @@ const InstructorDashboard: React.FC = () => {
 
           <div className="relative bg-slate-50 w-full max-w-4xl max-h-[95vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in slide-in-from-bottom-12 duration-500">
             {/* Modal Header */}
-            <div className="bg-white px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100">
-                  <BarChart3 size={28} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Practical Analysis</h2>
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Real-Life Exam Review Mode</p>
-                </div>
-              </div>
+            <div className="bg-white px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">Session Analysis</h2>
 
-              <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <div className="flex bg-slate-100/50 p-1 rounded-xl">
                 {(['overview', 'students', 'questions'] as const).map(tab => (
                   <button
                     key={tab}
                     onClick={() => setAnalyticsTab(tab)}
-                    className={`px-5 py-2 rounded-xl text-xs font-black transition-all ${analyticsTab === tab ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${analyticsTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                   >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {tab}
                   </button>
                 ))}
               </div>
 
               <button
                 onClick={() => setShowAdvancedAnalytics(false)}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+                className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
               >
-                <X size={24} />
+                <X size={18} />
               </button>
             </div>
 
@@ -1682,71 +1674,58 @@ const InstructorDashboard: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-indigo-200">
               {analyticsTab === 'overview' && (
                 <div className="space-y-8 animate-in fade-in duration-500">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg. Score</p>
-                      <p className="text-4xl font-black text-indigo-600">{sessionOverview.avgScore}%</p>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500" style={{ width: `${sessionOverview.avgScore}%` }} />
+                  {/* Key Metrics */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[
+                      { l: 'Average', v: `${sessionOverview.avgScore}%`, c: 'text-indigo-600' },
+                      { l: 'Particip.', v: `${sessionOverview.participationRate}%`, c: 'text-emerald-600' },
+                      { l: 'Top Score', v: `${sessionOverview.topStudent?.percentage || 0}%`, c: 'text-slate-900' },
+                      { l: 'Hardest Q', v: `${sessionOverview.hardestQuestion?.percentage || 0}%`, c: 'text-rose-600' }
+                    ].map((stat, i) => (
+                      <div key={i} className="p-4 rounded-2xl border border-slate-100 bg-white text-center">
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">{stat.l}</p>
+                        <p className={`text-2xl font-black ${stat.c}`}>{stat.v}</p>
                       </div>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Participation</p>
-                      <p className="text-4xl font-black text-emerald-600">{sessionOverview.participationRate}%</p>
-                      <p className="text-[10px] text-slate-500 font-bold">{sessionOverview.totalAnswered} Answers / {sessionOverview.totalPossible} Possible</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top Candidate</p>
-                      <p className="text-lg font-black text-slate-900 truncate px-2">{sessionOverview.topStudent?.name || 'N/A'}</p>
-                      <p className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full inline-block">{sessionOverview.topStudent?.percentage || 0}% Accuracy</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm text-center space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hardest Q</p>
-                      <p className="text-lg font-black text-slate-900 truncate px-2">Q{sessionOverview.hardestQuestion?.index || 'N/A'}</p>
-                      <p className="text-[10px] font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full inline-block">{sessionOverview.hardestQuestion?.percentage || 0}% Correct</p>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Highlights section */}
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200">
-                      <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                        <Users size={20} className="text-indigo-600" />
-                        Class Performance Dist.
-                      </h3>
-                      <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Distribution */}
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">Grade Distribution</h3>
+                      <div className="space-y-3">
                         {[
-                          { l: 'Excellence (80-100%)', c: 'bg-emerald-500', v: studentAnalytics.filter(s => s.percentage >= 80).length },
-                          { l: 'Satisfactory (60-79%)', c: 'bg-indigo-500', v: studentAnalytics.filter(s => s.percentage >= 60 && s.percentage < 80).length },
-                          { l: 'Passing (40-59%)', c: 'bg-amber-500', v: studentAnalytics.filter(s => s.percentage >= 40 && s.percentage < 60).length },
-                          { l: 'Needs Focus (Below 40%)', c: 'bg-rose-500', v: studentAnalytics.filter(s => s.percentage < 40).length }
+                          { l: 'Excellence (80+)', c: 'bg-emerald-500', v: studentAnalytics.filter(s => s.percentage >= 80).length },
+                          { l: 'Good (60-79)', c: 'bg-indigo-500', v: studentAnalytics.filter(s => s.percentage >= 60 && s.percentage < 80).length },
+                          { l: 'Average (40-59)', c: 'bg-amber-500', v: studentAnalytics.filter(s => s.percentage >= 40 && s.percentage < 60).length },
+                          { l: 'Low (<40)', c: 'bg-rose-500', v: studentAnalytics.filter(s => s.percentage < 40).length }
                         ].map((stat, i) => (
-                          <div key={i} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full ${stat.c}`} />
-                              <span className="text-xs font-bold text-slate-600">{stat.l}</span>
+                          <div key={i} className="flex items-center justify-between text-xs font-medium">
+                            <span className="text-slate-500 min-w-[90px]">{stat.l}</span>
+                            <div className="flex-1 flex items-center gap-3 px-2">
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full ${stat.c}`} style={{ width: `${students.length ? (stat.v / students.length) * 100 : 0}%` }} />
+                              </div>
                             </div>
-                            <span className="text-xs font-black text-slate-900">{stat.v} Students</span>
+                            <span className="font-bold text-slate-900 w-4 text-right">{stat.v}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white space-y-6">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-xl font-black">Quick Summary</h3>
-                        <Sparkles size={24} className="opacity-50" />
-                      </div>
-                      <p className="text-sm text-indigo-100 opacity-90 leading-relaxed font-medium">
-                        The exam session on "{topic || 'Untitled'}" saw a {sessionOverview.participationRate}% participation rate.
-                        {sessionOverview.avgScore > 60 ? 'Generally, students grasped the concepts well.' : 'The results suggest some areas require further clarification.'}
-                        The hardest challenge for the group was "{sessionOverview.hardestQuestion?.text.slice(0, 40)}...".
+                    {/* Summary Text */}
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-center space-y-4">
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">Brief</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                        Session on <span className="text-slate-900 font-bold">{topic || 'Untitled'}</span>.
+                        Performance is <span className="text-slate-900 font-bold">{sessionOverview.avgScore > 60 ? 'solid' : 'mixed'}</span>.
+                        Review Q{sessionOverview.hardestQuestion?.index} (lowest acc).
                       </p>
                       <button
                         onClick={() => publishResults(true)}
-                        className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black shadow-xl shadow-black/10 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+                        className="w-full py-2.5 bg-white border border-slate-200 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-50 transition-colors uppercase tracking-wide shadow-sm"
                       >
-                        Push Final Results Now
+                        Publish Results
                       </button>
                     </div>
                   </div>
@@ -1754,55 +1733,22 @@ const InstructorDashboard: React.FC = () => {
               )}
 
               {analyticsTab === 'students' && (
-                <div className="space-y-4 animate-in fade-in duration-500">
-                  <div className="bg-white p-4 rounded-[1.5rem] border border-slate-200 mb-6">
-                    <div className="grid grid-cols-6 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
-                      <div className="col-span-2">Candidate</div>
-                      <div className="text-center">Score %</div>
-                      <div className="text-center">R / W</div>
-                      <div className="text-center">Grade</div>
-                      <div className="text-right">Action</div>
-                    </div>
-                  </div>
+                <div className="space-y-2 animate-in fade-in duration-500">
                   {studentAnalytics.map(student => (
-                    <div key={student.id} className="bg-white p-4 md:p-6 rounded-3xl border border-slate-100 hover:border-indigo-200 transition-all group">
-                      <div className="grid grid-cols-6 items-center">
-                        <div className="col-span-2 flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-white ${student.percentage >= 80 ? 'bg-emerald-500' : student.percentage >= 50 ? 'bg-indigo-500' : 'bg-rose-500'}`}>
-                            {student.name[0]}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{student.name}</p>
-                            <p className="text-[10px] text-slate-400 font-mono">{student.id.slice(0, 6)}</p>
-                          </div>
+                    <div key={student.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-white ${student.percentage >= 60 ? 'bg-indigo-500' : 'bg-slate-400'}`}>
+                          {student.name[0]}
                         </div>
-                        <div className="text-center">
-                          <p className="text-lg font-black text-slate-900">{student.percentage}%</p>
-                        </div>
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-1.5 text-[10px] font-black">
-                            <span className="text-emerald-500">{student.correct}✓</span>
-                            <span className="text-slate-300">/</span>
-                            <span className="text-rose-500">{student.wrong}✗</span>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{student.name}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+                            <span>{student.correct} Correct</span> • <span>{student.wrong} Wrong</span>
                           </div>
                         </div>
-                        <div className="text-center">
-                          <span className={`px-3 py-1 rounded-lg text-xs font-black ${student.grade === 'A' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
-                            Grade {student.grade}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <button
-                            onClick={() => {
-                              const text = `📊 Exam Score Sheet: ${student.name}\n\n📝 Topic: ${topic}\n✅ Correct: ${student.correct}\n❌ Wrong: ${student.wrong}\n⏳ Skipped: ${student.skipped}\n🏆 Score: ${student.percentage}%\n🎯 Grade: ${student.grade}\n\nProvided by PeerMesh Exam System`;
-                              window.open(`whatsapp://send?text=${encodeURIComponent(text)}`);
-                            }}
-                            className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
-                            title="Share via WhatsApp"
-                          >
-                            <MessageCircle size={18} />
-                          </button>
-                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-sm font-black ${student.percentage >= 50 ? 'text-emerald-600' : 'text-rose-600'}`}>{student.percentage}%</span>
                       </div>
                     </div>
                   ))}
@@ -1810,36 +1756,16 @@ const InstructorDashboard: React.FC = () => {
               )}
 
               {analyticsTab === 'questions' && (
-                <div className="space-y-4 animate-in fade-in duration-500">
+                <div className="space-y-2 animate-in fade-in duration-500">
                   {questionAnalytics.map(q => (
-                    <div key={q.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-black rounded-md">Q{q.index}</span>
-                            <span className={`px-2 py-0.5 text-[10px] font-black rounded-md ${q.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' : q.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}`}>
-                              {q.difficulty}
-                            </span>
-                          </div>
-                          <p className="text-sm font-bold text-slate-800 leading-snug">{q.text}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-black text-slate-900">{q.percentage}%</p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Success</p>
-                        </div>
+                    <div key={q.id} className="p-4 rounded-2xl border border-slate-100 bg-white hover:border-indigo-100 transition-all">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-bold rounded text-slate-500">Q{q.index}</span>
+                        <span className={`text-xs font-black ${q.percentage >= 60 ? 'text-emerald-600' : 'text-rose-500'}`}>{q.percentage}% Success</span>
                       </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                          <span>Correct ({q.correct})</span>
-                          <span>Total Attempts ({q.total})</span>
-                        </div>
-                        <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                          <div
-                            className={`h-full transition-all duration-1000 ${q.percentage < 40 ? 'bg-rose-500' : q.percentage < 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${q.percentage}%` }}
-                          />
-                        </div>
+                      <p className="text-xs font-medium text-slate-700 mb-3 line-clamp-2">{q.text}</p>
+                      <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                        <div className={`h-full ${q.percentage >= 60 ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${q.percentage}%` }} />
                       </div>
                     </div>
                   ))}
@@ -1848,29 +1774,22 @@ const InstructorDashboard: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-white p-6 md:p-8 flex items-center justify-between border-t border-slate-200">
-              <div className="hidden sm:block">
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Analysis Mode active</p>
-                <p className="text-[10px] text-slate-400">Review outcomes before student publication</p>
-              </div>
-              <div className="flex gap-4 w-full sm:w-auto">
-                <button
-                  onClick={() => setShowAdvancedAnalytics(false)}
-                  className="flex-1 sm:flex-none px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black hover:bg-slate-200 transition-all"
-                >
-                  Close Analysis
-                </button>
-                <button
-                  onClick={() => {
-                    const summary = `🏆 Exam Summary: ${topic}\n\n👥 Attendees: ${students.length}\n📊 Class Average: ${sessionOverview.avgScore}%\n✅ Question Success: Q1: ${questionAnalytics[0]?.percentage || 0}%\n\nSession completed via PeerMesh.`;
-                    window.open(`whatsapp://send?text=${encodeURIComponent(summary)}`);
-                  }}
-                  className="flex-1 sm:flex-none px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
-                >
-                  <MessageCircle size={20} />
-                  Share Class Report
-                </button>
-              </div>
+            <div className="bg-white p-4 flex items-center justify-end gap-3 border-t border-slate-100">
+              <button
+                onClick={() => setShowAdvancedAnalytics(false)}
+                className="px-6 py-2.5 text-slate-500 font-bold text-xs hover:bg-slate-50 rounded-xl transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  const summary = `🏆 Exam Summary: ${topic}\n\n👥 Attendees: ${students.length}\n📊 Class Average: ${sessionOverview.avgScore}%\n✅ Question Success: Q1: ${questionAnalytics[0]?.percentage || 0}%\n\nSession completed via PeerMesh.`;
+                  window.open(`whatsapp://send?text=${encodeURIComponent(summary)}`);
+                }}
+                className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-slate-800 transition-all flex items-center gap-2"
+              >
+                <MessageCircle size={14} /> Share Report
+              </button>
             </div>
           </div>
         </div>
